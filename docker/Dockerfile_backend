@@ -1,0 +1,17 @@
+# Use official Python image
+FROM python:3.14-slim
+
+# Set work directory
+WORKDIR /app
+
+# Copy requirements file
+COPY backend/requirements.txt ./requirements.txt
+
+# Install dependencies
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy entire backend directory
+COPY backend/ ./backend/
+
+# Default command (can be overridden)
+CMD ["python3"]

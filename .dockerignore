@@ -1,0 +1,29 @@
+# General
+.git
+.gitignore
+README.md
+Dockerfile*
+.dockerignore
+
+# Node / frontend
+frontend/bricks-valuation/node_modules
+frontend/bricks-valuation/dist
+frontend/bricks-valuation/.vite
+
+# Python
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.sqlite3
+
+# Env / secrets
+.env
+env/
+*.env
+
+# Logs
+*.log
+
+# Misc
+.DS_Store

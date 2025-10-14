@@ -5,6 +5,10 @@ Frontend:
 - Shadcn/vue zapewnia bibliotekę dostępnych komponentów React, na których oprzemy UI
 - Pinia do zarzadzania store’m
 - i18n do przechowywania tekstów
+- vite
+- eslint
+- prettier
+- yarn
 
 Backend:
 - Python

@@ -132,11 +132,10 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+.backend-env
+.frontend-env
 .venv
-env/
 venv/
-ENV/
 env.bak/
 venv.bak/
 
@@ -507,5 +506,8 @@ node_modules/
 dist/
 npm-debug.log
 yarn-error.log
+.idea/
+./idea
+.vscode/
 
 # End of https://www.toptal.com/developers/gitignore/api/venv,python,pycharm,webstorm,visualstudiocode,django,git

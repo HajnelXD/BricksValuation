@@ -1,0 +1,20 @@
+# Use official Node.js Debian-based image (better compatibility with native/optional deps than Alpine musl)
+FROM node:24-alpine
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json and yarn.lock
+COPY frontend/bricks-valuation/package.json ./
+
+# Install dependencies (no lockfile yet, fallback to best effort). Add busybox-suid for some tooling if needed.
+RUN yarn install --no-progress --pure-lockfile || yarn install --no-progress
+
+# Copy rest of the frontend code
+COPY frontend/bricks-valuation .
+
+# Expose port for Vite dev server
+EXPOSE 5173
+
+# Start Vite dev server
+CMD ["yarn", "dev", "--host"]
