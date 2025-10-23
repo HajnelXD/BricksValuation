@@ -9,9 +9,10 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar, Optional
 
-from valuation.models import Valuation, Like, SystemMetrics
+from valuation.models import Like, SystemMetrics, Valuation
 
 # --------------------------- Command Models ---------------------------
+
 
 @dataclass(slots=True)
 class CreateValuationCommand:
@@ -24,7 +25,7 @@ class CreateValuationCommand:
     source_model: ClassVar[type[Valuation]] = Valuation
 
     brickset_id: int
-    value: int
+    value: int  # noqa: WPS110 - domain field name
     currency: Optional[str] = None  # default logic will substitute 'PLN'
     comment: Optional[str] = None
 
@@ -52,15 +53,14 @@ class UnlikeValuationCommand:
 
     valuation_id: int
 
-
 # ----------------------------- DTO Models -----------------------------
+
 
 @dataclass(slots=True)
 class ValuationDTO:
-    """Full valuation representation (create success, detail view).
+    """Valuation representation for create success and API payloads.
 
-    Exposes both `created_at` and `updated_at`. `likes_count` is denormalized
-    field from model.
+    `updated_at` can remain unset for list endpoints to keep payload compact.
     """
 
     source_model: ClassVar[type[Valuation]] = Valuation
@@ -68,30 +68,12 @@ class ValuationDTO:
     id: int
     brickset_id: int
     user_id: int
-    value: int
+    value: int  # noqa: WPS110 - domain field name
     currency: str
     comment: Optional[str]
     likes_count: int
     created_at: datetime
-    updated_at: datetime
-
-
-@dataclass(slots=True)
-class ValuationListItemDTO:
-    """Valuation item for list endpoints (`GET /bricksets/{id}/valuations`).
-
-    Omits `updated_at` for brevity in aggregated listing.
-    """
-
-    source_model: ClassVar[type[Valuation]] = Valuation
-
-    id: int
-    user_id: int
-    value: int
-    currency: str
-    comment: Optional[str]
-    likes_count: int
-    created_at: datetime
+    updated_at: Optional[datetime] = None
 
 
 @dataclass(slots=True)
@@ -109,16 +91,6 @@ class LikeDTO:
 
 
 @dataclass(slots=True)
-class LikeListItemDTO:
-    """Item for `/valuations/{valuation_id}/likes` list (optional endpoint)."""
-
-    source_model: ClassVar[type[Like]] = Like
-
-    user_id: int
-    liked_at: datetime  # mapped from Like.created_at
-
-
-@dataclass(slots=True)
 class OwnedValuationListItemDTO:
     """Item for `/users/me/valuations` list.
 
@@ -129,13 +101,13 @@ class OwnedValuationListItemDTO:
 
     id: int
     brickset: dict  # {"id": int, "number": int}
-    value: int
+    value: int  # noqa: WPS110 - domain field name
     currency: str
     likes_count: int
     created_at: datetime
 
-
 # ----------------------------- Metrics DTO ----------------------------
+
 
 @dataclass(slots=True)
 class SystemMetricsDTO:
@@ -154,4 +126,3 @@ class SystemMetricsDTO:
     serviced_sets_ratio: float
     active_users_ratio: float
     updated_at: datetime
-

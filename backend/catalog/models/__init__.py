@@ -1,3 +1,1 @@
-"""Catalog app models export."""
-
-from .brickset import BrickSet  # noqa: F401, WPS300
+from catalog.models.brickset import BrickSet

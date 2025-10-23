@@ -30,7 +30,7 @@ services:
       - backend
 
   db:
-    image: postgres:18
+    image: postgres:16
     restart: always
     env_file:
       - env/.backend-env

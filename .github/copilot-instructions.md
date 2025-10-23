@@ -7,11 +7,21 @@ An app for pricing used Lego bricks.
 ### Guidelines for PYTHON
 
 #### DJANGO
-
-- Use class-based views instead of function-based views for more maintainable and reusable code components
-- Implement Django REST Framework for building APIs with serializers that enforce data validation
-- Leverage Django signals sparingly and document their usage to avoid hidden side effects in the application flow
-- Implement custom model managers for encapsulating complex query logic rather than repeating queries across views
+English version:
+- Use class-based views (APIView / GenericAPIView). A view must remain a thin layer: input validation via serializer + delegation to the service layer.
+- Service layer (`account/services/*.py`) coordinates domain logic, business validation and handles transactions (`transaction.atomic()`). Never place domain logic inside views or serializers beyond simple structural validation.
+- Serializers validate field format and basic constraints; they convert validated data to Command objects (e.g. `RegisterUserCommand`) via `to_command()`. Do not add side-effects or database writes in serializers.
+- Commands & DTOs (`datastore/domains/*_dto.py`) are dataclasses with `slots=True`; they declare explicit mapping to models (`source_model`) and separate inbound payload (Command) from outbound data (DTO). Never expose sensitive fields (e.g. raw password) in DTOs.
+- Enforce uniqueness and length rules both with model validators and (if needed) DB-level `CheckConstraint` (see `User` model). When adding constraints: first validator, then constraint for immediate feedback and consistency.
+- Domain exceptions (e.g. `RegistrationConflictError`, `RegistrationValidationError`) signal controlled error states; the view maps them to proper HTTP codes (400 / 409). Avoid catching broad exceptions; introduce targeted exception classes for new scenarios.
+- Wrap persistence in transactions where races or atomicity are required. For expected uniqueness conflicts, catch only specific `IntegrityError` and map to domain exception.
+- Set passwords using `User.set_password`; never store raw password outside the transient Command object processed in the service.
+- Limit Django signals; prefer explicit service calls. If a signal is necessary (e.g. side-effect after record creation) document it in the module docstring and test in isolation.
+- Adding a new endpoint: (1) create Serializer + `to_command()`, (2) add Command/DTO if needed, (3) create Service with `execute()`, (4) create class-based view delegating to service, (5) add tests: serializer, service (unit), view (API). Keep naming consistent.
+- Do not bloat models – complex business logic belongs in services. Models keep validators, constraints, simple behaviors (timestamps, etc.).
+- After EVERY backend code change before committing run linter: `./bin/lint_backend.sh` and tests: `./bin/test_backend.sh` (see PYTEST section). Commit only if both pass.
+- After adding any new code changes, always run the backend linter using the command `./bin/lint_backend.sh` as specified in the README.md to ensure adherence to coding standards.
+- Ensure that after code updates, the full backend test suite is executed via `./bin/test_backend.sh` to maintain quality and test coverage (minimum 90%).
 
 ## DEVOPS
 
@@ -28,10 +38,22 @@ An app for pricing used Lego bricks.
 ### Guidelines for UNIT
 
 #### PYTEST
-
-- Use fixtures for test setup and dependency injection
-- Use monkeypatch for unittest.mock
-- For preparing test data use baker
+English version:
+- Always run backend tests via the script: `./bin/test_backend.sh` – it sets correct environment, coverage and uses `--nomigrations` for speed.
+- Minimum coverage threshold is 90% (enforced by `--cov-fail-under=90`). Adding code without tests must not drop coverage; if it does, add missing tests instead of lowering the threshold.
+- Test structure: each implementation module has a sibling `tests/` folder (e.g. `account/services/tests/test_registration_service.py`). Follow this for new elements (serializers, services, views, utils). Do not add tests to a global root folder.
+- File naming: `test_<name>_<type>.py` or `test_<function>.py`. Test classes end with suffix `Tests` (e.g. `RegistrationServiceTests`).
+- Categories: (1) Unit – service layer, serializers, exceptions; (2) API/integration – DRF views with `APIRequestFactory` or `APITestCase`. In view tests assert status, payload and side-effects (e.g. user persisted). Avoid end-to-end tests except critical flows.
+- Use `pytest.raises` for asserting domain & validation exceptions. Within `django.test.TestCase`/`APITestCase` classes plain `assert` is acceptable (pytest compatible).
+- Arrange-Act-Assert: build helper `_build_command()` methods for repeated payloads – improves readability & reuse.
+- Serializer tests must not write to DB – limit to data validation and `to_command()` conversion.
+- Mocking: use `unittest.mock.patch` / `monkeypatch` selectively to isolate costly dependencies (e.g. external services). Do not mock the ORM where in‑memory test DB suffices.
+- Every error scenario (uniqueness conflict, validation failure, whitespace in username, etc.) requires a dedicated clearly named test.
+- When introducing new domain exceptions immediately add a test for its HTTP mapping in the view.
+- Do not skip tests without a justification comment and planned fix.
+- Before push: (1) `./bin/lint_backend.sh` (2) `./bin/test_backend.sh` – both must exit 0. In PR describe new scenarios under "Test coverage".
+- After adding any new code changes, always run the backend linter using the command `./bin/lint_backend.sh` as specified in the README.md to ensure adherence to coding standards.
+- Ensure that after code updates, the full backend test suite is executed via `./bin/test_backend.sh` to maintain quality and test coverage (minimum 90%).
 
 ### Guidelines for E2E
 
