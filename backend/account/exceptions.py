@@ -19,3 +19,19 @@ class RegistrationValidationError(Exception):
     def __init__(self, errors: Mapping[str, list[str]]) -> None:
         super().__init__("Invalid registration data.")
         self.errors = errors
+
+
+class LoginValidationError(Exception):
+    """Raised when login data fails validation before authentication."""
+
+    def __init__(self, errors: Mapping[str, list[str]]) -> None:
+        super().__init__("Invalid login data.")
+        self.errors = errors
+
+
+class InvalidCredentialsError(Exception):
+    """Raised when username/password combination is invalid or account inactive."""
+
+    def __init__(self, message: str = "Invalid username or password.") -> None:
+        super().__init__(message)
+        self.message = message

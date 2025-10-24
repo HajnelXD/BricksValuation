@@ -1,6 +1,7 @@
 Django>=5.2.7
 djangorestframework>=3.16.1
 psycopg2-binary>=2.9.11
+PyJWT>=2.8.1
 flake8>=7.3.0
 wemake-python-styleguide>=1.4.0
 pytest>=8.4.2
