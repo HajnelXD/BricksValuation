@@ -34,7 +34,7 @@ class TestLoginView(APITestCase):
         self.user.set_password(TEST_PASSWORD)
         self.user.save()
 
-    def test_successful_login_returns_200_with_user_data(self) -> None:
+    def test_successful_login_returns_ok(self) -> None:
         """Test successful login returns 200 with user info."""
         payload = {"username": TEST_USERNAME, "password": TEST_PASSWORD}
 
@@ -43,11 +43,11 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_200_OK
-        data = response.data
-        assert "user" in data
-        assert data["user"]["id"] == self.user.id
-        assert data["user"]["username"] == TEST_USERNAME
-        assert data["user"]["email"] == TEST_EMAIL
+        response_payload = response.data
+        assert "user" in response_payload
+        assert response_payload["user"]["id"] == self.user.id
+        assert response_payload["user"]["username"] == TEST_USERNAME
+        assert response_payload["user"]["email"] == TEST_EMAIL
 
     def test_successful_login_sets_httponly_cookie(self) -> None:
         """Test that successful login sets HttpOnly cookie with token."""
@@ -83,11 +83,11 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_200_OK
-        data = response.data
-        assert "token" not in data
-        assert "jwt" not in data
+        response_payload = response.data
+        assert "token" not in response_payload
+        assert "jwt" not in response_payload
 
-    def test_missing_username_returns_400(self) -> None:
+    def test_missing_username_fails_validation(self) -> None:
         """Test that missing username returns 400."""
         payload = {"password": TEST_PASSWORD}
 
@@ -96,11 +96,11 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        data = response.data
-        assert "errors" in data
-        assert "username" in data["errors"]
+        response_payload = response.data
+        assert "errors" in response_payload
+        assert "username" in response_payload["errors"]
 
-    def test_missing_password_returns_400(self) -> None:
+    def test_missing_password_fails_validation(self) -> None:
         """Test that missing password returns 400."""
         payload = {"username": TEST_USERNAME}
 
@@ -109,11 +109,11 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
-        data = response.data
-        assert "errors" in data
-        assert "password" in data["errors"]
+        response_payload = response.data
+        assert "errors" in response_payload
+        assert "password" in response_payload["errors"]
 
-    def test_username_too_short_returns_400(self) -> None:
+    def test_username_too_short_fails(self) -> None:
         """Test that username shorter than min length returns 400."""
         payload = {"username": "ab", "password": TEST_PASSWORD}
 
@@ -123,7 +123,7 @@ class TestLoginView(APITestCase):
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_password_too_short_returns_400(self) -> None:
+    def test_password_too_short_fails(self) -> None:
         """Test that password shorter than min length returns 400."""
         payload = {"username": TEST_USERNAME, "password": "short"}
 
@@ -133,7 +133,7 @@ class TestLoginView(APITestCase):
 
         assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-    def test_invalid_credentials_returns_401(self) -> None:
+    def test_invalid_credentials_returns_auth_error(self) -> None:
         """Test that invalid credentials return 401."""
         payload = {"username": TEST_USERNAME, "password": "WrongPassword!"}
 
@@ -142,10 +142,10 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
-        data = response.data
-        assert "detail" in data
+        response_payload = response.data
+        assert "detail" in response_payload
 
-    def test_nonexistent_user_returns_401(self) -> None:
+    def test_nonexistent_user_returns_auth_error(self) -> None:
         """Test that nonexistent user returns 401."""
         payload = {"username": "nonexistent", "password": TEST_PASSWORD}
 
@@ -155,7 +155,7 @@ class TestLoginView(APITestCase):
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_inactive_user_returns_401(self) -> None:
+    def test_inactive_user_returns_auth_error(self) -> None:
         """Test that inactive user returns 401."""
         inactive_user = baker.make(
             "account.User",
@@ -174,30 +174,30 @@ class TestLoginView(APITestCase):
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_error_message_generic_for_security(self) -> None:
-        """Test that error messages are generic for both nonexistent and wrong password."""
-        payload_nonexistent = {"username": "nonexistent", "password": TEST_PASSWORD}
-        payload_wrong_password = {
-            "username": TEST_USERNAME,
-            "password": "WrongPassword!",
-        }
-
-        request_nonexistent = self.factory.post(
-            self.url, payload_nonexistent, format="json"
+    def test_generic_error_for_all_failures(self) -> None:
+        """Test that error messages are generic for security."""
+        nonexistent_resp = self.view(
+            self.factory.post(
+                self.url,
+                {"username": "nonexistent", "password": TEST_PASSWORD},
+                format="json",
+            )
         )
-        response_nonexistent = self.view(request_nonexistent)
-        response_nonexistent.render()
+        nonexistent_resp.render()
 
-        request_wrong = self.factory.post(
-            self.url, payload_wrong_password, format="json"
+        wrong_pwd_resp = self.view(
+            self.factory.post(
+                self.url,
+                {"username": TEST_USERNAME, "password": "WrongPassword!"},
+                format="json",
+            )
         )
-        response_wrong = self.view(request_wrong)
-        response_wrong.render()
+        wrong_pwd_resp.render()
 
-        assert response_nonexistent.status_code == status.HTTP_401_UNAUTHORIZED
-        assert response_wrong.status_code == status.HTTP_401_UNAUTHORIZED
+        assert nonexistent_resp.status_code == status.HTTP_401_UNAUTHORIZED
+        assert wrong_pwd_resp.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_username_case_sensitivity(self) -> None:
+    def test_username_case_sensitive(self) -> None:
         """Test that username is case-sensitive."""
         payload = {"username": TEST_USERNAME.upper(), "password": TEST_PASSWORD}
 
@@ -207,7 +207,7 @@ class TestLoginView(APITestCase):
 
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
 
-    def test_whitespace_in_username_trimmed_by_serializer(self) -> None:
+    def test_whitespace_trimmed_from_username(self) -> None:
         """Test that whitespace in username is trimmed."""
         payload = {
             "username": f"  {TEST_USERNAME}  ",
@@ -219,8 +219,8 @@ class TestLoginView(APITestCase):
         response.render()
 
         assert response.status_code == status.HTTP_200_OK
-        data = response.data
-        assert data["user"]["username"] == TEST_USERNAME
+        response_payload = response.data
+        assert response_payload["user"]["username"] == TEST_USERNAME
 
     def test_response_includes_required_user_fields(self) -> None:
         """Test that response includes id, username, and email."""

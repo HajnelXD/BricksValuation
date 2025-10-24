@@ -36,7 +36,6 @@ class LoginView(APIView):
             Response with 200 and user data + HttpOnly cookie on success,
             or appropriate error response (400, 401).
         """
-        # Validate input
         serializer = self.serializer_class(data=request.data)
         if not serializer.is_valid():
             return Response(
@@ -44,34 +43,24 @@ class LoginView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Convert to command
-        command = serializer.to_command()
-
-        # Authenticate
-        service = self.service_class()
         try:
-            user_ref = service.execute(command)
+            user_ref = self.service_class().execute(serializer.to_command())
         except InvalidCredentialsError as exc:
             return Response(
                 {"detail": exc.message},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
 
-        # Generate token
-        token_provider = self.token_provider_class()
-        token = token_provider.generate_token(
+        token = self.token_provider_class().generate_token(
             user_id=user_ref.id,
             username=user_ref.username,
         )
 
-        # Build response
-        payload = asdict(user_ref)
         response = Response(
-            {"user": payload},
+            {"user": asdict(user_ref)},
             status=status.HTTP_200_OK,
         )
 
-        # Set HttpOnly secure cookie with token
         response.set_cookie(
             key=jwt_config.COOKIE_NAME,
             value=token,

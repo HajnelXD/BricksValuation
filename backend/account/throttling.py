@@ -25,7 +25,9 @@ class LoginRateThrottle(SimpleRateThrottle):
         """
         if self.request.user and self.request.user.is_authenticated:
             # If user is authenticated, throttle by user ID
-            return f"throttle_{self.scope}_user_{self.request.user.id}"
+            scope = self.scope
+            user_id = self.request.user.id
+            return f"throttle_{scope}_user_{user_id}"
 
         # Throttle by IP address
         return self.get_ident(self.request)

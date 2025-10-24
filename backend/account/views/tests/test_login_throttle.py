@@ -58,21 +58,24 @@ class TestLoginRateThrottling(APITestCase):
 
     def test_valid_login_after_failed_attempts(self) -> None:
         """Test that valid login works after failed attempts."""
-        # First, attempt with wrong password
-        wrong_payload = {"username": TEST_USERNAME, "password": "WrongPassword!"}
-        request_wrong = self.factory.post(self.url, wrong_payload, format="json")
-        response_wrong = self.view(request_wrong)
-        assert response_wrong.status_code == status.HTTP_401_UNAUTHORIZED
-
-        # Then, attempt with correct password
-        correct_payload = {"username": TEST_USERNAME, "password": TEST_PASSWORD}
-        request_correct = self.factory.post(
-            self.url, correct_payload, format="json"
+        wrong_response = self.view(
+            self.factory.post(
+                self.url,
+                {"username": TEST_USERNAME, "password": "WrongPassword!"},
+                format="json",
+            )
         )
-        response_correct = self.view(request_correct)
+        assert wrong_response.status_code == status.HTTP_401_UNAUTHORIZED
 
-        # Should succeed if not throttled
-        assert response_correct.status_code in [
+        correct_response = self.view(
+            self.factory.post(
+                self.url,
+                {"username": TEST_USERNAME, "password": TEST_PASSWORD},
+                format="json",
+            )
+        )
+
+        assert correct_response.status_code in [
             status.HTTP_200_OK,
             status.HTTP_429_TOO_MANY_REQUESTS,
         ]

@@ -34,12 +34,12 @@ class LoginServiceTests(TestCase):
         """Test successful login returns UserRefDTO with user data."""
         cmd = LoginCommand(username=TEST_USERNAME, password=TEST_PASSWORD)
 
-        result = self.service.execute(cmd)
+        user_dto = self.service.execute(cmd)
 
-        assert isinstance(result, UserRefDTO)
-        assert result.id == self.active_user.id
-        assert result.username == TEST_USERNAME
-        assert result.email == TEST_EMAIL
+        assert isinstance(user_dto, UserRefDTO)
+        assert user_dto.id == self.active_user.id
+        assert user_dto.username == TEST_USERNAME
+        assert user_dto.email == TEST_EMAIL
 
     def test_nonexistent_username_raises_error(self) -> None:
         """Test that nonexistent username raises InvalidCredentialsError."""
@@ -85,15 +85,14 @@ class LoginServiceTests(TestCase):
             self.service.execute(cmd)
 
     def test_returned_dto_excludes_sensitive_data(self) -> None:
-        """Test that returned DTO excludes created_at and other sensitive fields."""
+        """Test that returned DTO excludes created_at and other fields."""
         cmd = LoginCommand(username=TEST_USERNAME, password=TEST_PASSWORD)
 
-        result = self.service.execute(cmd)
+        user_dto = self.service.execute(cmd)
 
-        # UserRefDTO should not have created_at (only id, username, email)
-        assert not hasattr(result, "created_at")
-        assert not hasattr(result, "password")
-        assert not hasattr(result, "is_active")
+        assert not hasattr(user_dto, "created_at")
+        assert not hasattr(user_dto, "password")
+        assert not hasattr(user_dto, "is_active")
 
     def test_empty_password_raises_error(self) -> None:
         """Test that empty password raises InvalidCredentialsError."""
@@ -104,22 +103,19 @@ class LoginServiceTests(TestCase):
 
     def test_multiple_users_login_independently(self) -> None:
         """Test that multiple users can login independently."""
-        user1 = User.objects.create_user(
-            username="user1",
-            email="user1@example.com",
-            password="Password1!",
+        user_alt = User.objects.create_user(
+            username="user_alt",
+            email="user_alt@example.com",
+            password="PasswordAlt!",
         )
 
-        user2 = User.objects.create_user(
-            username="user2",
-            email="user2@example.com",
-            password="Password2!",
+        cmd_active = LoginCommand(
+            username=TEST_USERNAME,
+            password=TEST_PASSWORD,
         )
+        dto_active = self.service.execute(cmd_active)
+        assert dto_active.id == self.active_user.id
 
-        cmd1 = LoginCommand(username="user1", password="Password1!")
-        result1 = self.service.execute(cmd1)
-        assert result1.id == user1.id
-
-        cmd2 = LoginCommand(username="user2", password="Password2!")
-        result2 = self.service.execute(cmd2)
-        assert result2.id == user2.id
+        cmd_alt = LoginCommand(username="user_alt", password="PasswordAlt!")
+        dto_alt = self.service.execute(cmd_alt)
+        assert dto_alt.id == user_alt.id
