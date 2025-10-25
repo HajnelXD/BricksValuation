@@ -164,6 +164,22 @@ class ValuationListItemDTO:
     likes_count: int
     created_at: datetime
 
+
+@dataclass(slots=True)
+class LikeListItemDTO:
+    """Item for `GET /valuations/{valuation_id}/likes` list endpoint.
+
+    Memory-efficient DTO for paginated like lists. Contains minimal user reference
+    and creation timestamp. Excludes valuation_id (already in URL context) and
+    updated_at (not needed in list). Optimized for high-volume list operations
+    with slots=True.
+    """
+
+    source_model: ClassVar[type[Like]] = Like
+
+    user_id: int
+    created_at: datetime
+
 # ----------------------------- Metrics DTO ----------------------------
 
 
