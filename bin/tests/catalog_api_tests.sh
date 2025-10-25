@@ -9,8 +9,9 @@
 # - POST /api/v1/bricksets (create new BrickSet)
 # - GET /api/v1/bricksets/{id} (retrieve detail with valuations)
 # - PATCH /api/v1/bricksets/{id} (partial update)
+# - DELETE /api/v1/bricksets/{id} (delete BrickSet)
 #
-# Note: Requires authentication for POST and PATCH. Script automatically:
+# Note: Requires authentication for POST, PATCH and DELETE. Script automatically:
 # 1. Creates test user account
 # 2. Logs in to get JWT token
 # 3. Runs catalog API tests using the token
@@ -1187,6 +1188,213 @@ else
 fi
 
 # ============================================================
+# TEST 34: DELETE /api/v1/bricksets/{id} - SUCCESSFUL DELETE
+# ============================================================
+
+print_header "TEST 34: DELETE /api/v1/bricksets/{id} - SUCCESSFUL DELETE"
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/$BRICKSET2_ID"
+echo "Payload: (no body for DELETE)"
+echo "Expected: HTTP 204 No Content"
+echo ""
+
+DELETE_SUCCESS=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -X DELETE "$BASE_URL/bricksets/$BRICKSET2_ID")
+
+DELETE_SUCCESS_HTTP=$(echo "$DELETE_SUCCESS" | tail -1)
+DELETE_SUCCESS_BODY=$(echo "$DELETE_SUCCESS" | sed '$d')
+
+if [ "$DELETE_SUCCESS_HTTP" = "204" ]; then
+    print_success "BrickSet deleted successfully (HTTP $DELETE_SUCCESS_HTTP)"
+    echo "Response: (empty body for 204 No Content)"
+else
+    print_error "DELETE request failed (HTTP $DELETE_SUCCESS_HTTP)"
+    echo "$DELETE_SUCCESS_BODY"
+fi
+
+# ============================================================
+# TEST 35: DELETE /api/v1/bricksets/{id} - VERIFY DELETED
+# ============================================================
+
+print_header "TEST 35: DELETE /api/v1/bricksets/{id} - VERIFY DELETED FROM DB"
+
+echo "Endpoint: GET $BASE_URL/bricksets/$BRICKSET2_ID"
+echo "Expected: HTTP 404 Not Found (BrickSet was deleted)"
+echo ""
+
+GET_DELETED=$(curl -s -w "\n%{http_code}" "$BASE_URL/bricksets/$BRICKSET2_ID")
+
+GET_DELETED_HTTP=$(echo "$GET_DELETED" | tail -1)
+GET_DELETED_BODY=$(echo "$GET_DELETED" | sed '$d')
+
+if [ "$GET_DELETED_HTTP" = "404" ]; then
+    print_success "Deleted BrickSet not found (HTTP $GET_DELETED_HTTP) - Deletion verified"
+else
+    print_error "Expected 404 but got $GET_DELETED_HTTP - BrickSet may not have been deleted"
+fi
+
+# ============================================================
+# TEST 36: DELETE /api/v1/bricksets/{id} - UNAUTHORIZED (NO JWT)
+# ============================================================
+
+print_header "TEST 36: DELETE /api/v1/bricksets/{id} - UNAUTHORIZED (NO AUTH)"
+
+echo "Creating new BrickSet for this test..."
+
+# Create new brickset for deletion test
+BRICKSET_NUM_DEL=$((1000000 + (TIMESTAMP % 8999999) + 10))
+
+POST_FOR_DEL=$(curl -s -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X POST "$BASE_URL/bricksets" \
+  -d "{
+    \"number\": $BRICKSET_NUM_DEL,
+    \"production_status\": \"ACTIVE\",
+    \"completeness\": \"COMPLETE\",
+    \"has_instructions\": true,
+    \"has_box\": true,
+    \"is_factory_sealed\": false
+  }")
+
+BRICKSET_DEL_ID=$(echo "$POST_FOR_DEL" | jq '.id')
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/$BRICKSET_DEL_ID"
+echo "Expected: HTTP 401 Unauthorized (no JWT token)"
+echo ""
+
+DELETE_NOAUTH=$(curl -s -w "\n%{http_code}" \
+  -X DELETE "$BASE_URL/bricksets/$BRICKSET_DEL_ID")
+
+DELETE_NOAUTH_HTTP=$(echo "$DELETE_NOAUTH" | tail -1)
+DELETE_NOAUTH_BODY=$(echo "$DELETE_NOAUTH" | sed '$d')
+
+if [ "$DELETE_NOAUTH_HTTP" = "401" ]; then
+    print_success "Unauthenticated DELETE correctly rejected (HTTP $DELETE_NOAUTH_HTTP)"
+    echo "Error response:"
+    echo "$DELETE_NOAUTH_BODY" | jq '.detail'
+else
+    print_error "Expected 401 but got $DELETE_NOAUTH_HTTP"
+fi
+
+# ============================================================
+# TEST 37: DELETE /api/v1/bricksets/{id} - NOT OWNER (403)
+# ============================================================
+
+print_header "TEST 37: DELETE /api/v1/bricksets/{id} - NOT OWNER (FORBIDDEN)"
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/$BRICKSET_DEL_ID"
+echo "Attempt: Different user trying to delete first user's BrickSet"
+echo "Expected: HTTP 403 Forbidden (not owner)"
+echo ""
+
+DELETE_NOT_OWNER=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN2" \
+  -X DELETE "$BASE_URL/bricksets/$BRICKSET_DEL_ID")
+
+DELETE_NOT_OWNER_HTTP=$(echo "$DELETE_NOT_OWNER" | tail -1)
+DELETE_NOT_OWNER_BODY=$(echo "$DELETE_NOT_OWNER" | sed '$d')
+
+if [ "$DELETE_NOT_OWNER_HTTP" = "403" ]; then
+    print_success "Non-owner correctly rejected (HTTP $DELETE_NOT_OWNER_HTTP)"
+    echo "Error response:"
+    echo "$DELETE_NOT_OWNER_BODY" | jq '{detail, reason}'
+else
+    print_error "Expected 403 but got $DELETE_NOT_OWNER_HTTP"
+    echo "$DELETE_NOT_OWNER_BODY"
+fi
+
+# ============================================================
+# TEST 38: DELETE /api/v1/bricksets/{id} - NOT FOUND (404)
+# ============================================================
+
+print_header "TEST 38: DELETE /api/v1/bricksets/{id} - NOT FOUND"
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/999999"
+echo "Expected: HTTP 404 Not Found (nonexistent BrickSet)"
+echo ""
+
+DELETE_404=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -X DELETE "$BASE_URL/bricksets/999999")
+
+DELETE_404_HTTP=$(echo "$DELETE_404" | tail -1)
+DELETE_404_BODY=$(echo "$DELETE_404" | sed '$d')
+
+if [ "$DELETE_404_HTTP" = "404" ]; then
+    print_success "Not found correctly returned (HTTP $DELETE_404_HTTP)"
+    echo "Response:"
+    echo "$DELETE_404_BODY" | jq '.detail'
+else
+    print_error "Expected 404 but got $DELETE_404_HTTP"
+fi
+
+# ============================================================
+# TEST 39: DELETE /api/v1/bricksets/{id} - VERIFY STILL EXISTS AFTER FAILED DELETE
+# ============================================================
+
+print_header "TEST 39: DELETE /api/v1/bricksets/{id} - VERIFY NOT OWNER DIDN'T DELETE"
+
+echo "Endpoint: GET $BASE_URL/bricksets/$BRICKSET_DEL_ID"
+echo "Expected: HTTP 200 (BrickSet should still exist - not owner couldn't delete it)"
+echo ""
+
+GET_STILL_EXISTS=$(curl -s -w "\n%{http_code}" "$BASE_URL/bricksets/$BRICKSET_DEL_ID")
+
+GET_STILL_EXISTS_HTTP=$(echo "$GET_STILL_EXISTS" | tail -1)
+GET_STILL_EXISTS_BODY=$(echo "$GET_STILL_EXISTS" | sed '$d')
+
+if [ "$GET_STILL_EXISTS_HTTP" = "200" ]; then
+    print_success "BrickSet still exists (HTTP $GET_STILL_EXISTS_HTTP) - Deletion was prevented correctly"
+    echo "BrickSet number: $(echo "$GET_STILL_EXISTS_BODY" | jq '.number')"
+else
+    print_error "Expected 200 but got $GET_STILL_EXISTS_HTTP - BrickSet may have been wrongly deleted"
+fi
+
+# ============================================================
+# TEST 40: DELETE /api/v1/bricksets/{id} - SUCCESSFUL OWNER DELETE
+# ============================================================
+
+print_header "TEST 40: DELETE /api/v1/bricksets/{id} - SUCCESSFUL OWNER DELETE"
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/$BRICKSET_DEL_ID"
+echo "Attempt: Owner deleting own BrickSet"
+echo "Expected: HTTP 204 No Content"
+echo ""
+
+DELETE_OWNER=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -X DELETE "$BASE_URL/bricksets/$BRICKSET_DEL_ID")
+
+DELETE_OWNER_HTTP=$(echo "$DELETE_OWNER" | tail -1)
+DELETE_OWNER_BODY=$(echo "$DELETE_OWNER" | sed '$d')
+
+if [ "$DELETE_OWNER_HTTP" = "204" ]; then
+    print_success "Owner successfully deleted BrickSet (HTTP $DELETE_OWNER_HTTP)"
+else
+    print_error "DELETE request failed (HTTP $DELETE_OWNER_HTTP)"
+    echo "$DELETE_OWNER_BODY"
+fi
+
+# ============================================================
+# TEST 41: DELETE /api/v1/bricksets/{id} - VERIFY DELETE IDEMPOTENCE
+# ============================================================
+
+print_header "TEST 41: DELETE /api/v1/bricksets/{id} - DOUBLE DELETE (404)"
+
+echo "Endpoint: DELETE $BASE_URL/bricksets/$BRICKSET_DEL_ID (again)"
+echo "Expected: HTTP 404 Not Found (already deleted)"
+echo ""
+
+DELETE_AGAIN=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -X DELETE "$BASE_URL/bricksets/$BRICKSET_DEL_ID")
+
+DELETE_AGAIN_HTTP=$(echo "$DELETE_AGAIN" | tail -1)
+DELETE_AGAIN_BODY=$(echo "$DELETE_AGAIN" | sed '$d')
+
+if [ "$DELETE_AGAIN_HTTP" = "404" ]; then
+    print_success "Double delete correctly returned 404 (HTTP $DELETE_AGAIN_HTTP)"
+else
+    print_error "Expected 404 but got $DELETE_AGAIN_HTTP"
+fi
+
+# ============================================================
 # POST-TEST CLEANUP
 # ============================================================
 
@@ -1244,6 +1452,16 @@ echo "  ✅ Owner-only edit enforcement (403 for non-owner)"
 echo "  ✅ Authentication required for PATCH (401 unauthenticated)"
 echo "  ✅ 404 Not Found for nonexistent BrickSet"
 echo "  ✅ Response contains full BrickSet detail (with valuations/aggregates)"
+echo ""
+echo "DELETE ENDPOINTS (DELETE /api/v1/bricksets/{id}):"
+echo "  ✅ BrickSet deletion (DELETE /api/v1/bricksets/{id})"
+echo "  ✅ 204 No Content response on success"
+echo "  ✅ Verified deletion from database (subsequent GET returns 404)"
+echo "  ✅ Authentication required for DELETE (401 unauthenticated)"
+echo "  ✅ Owner-only delete enforcement (403 for non-owner)"
+echo "  ✅ 404 Not Found for nonexistent BrickSet"
+echo "  ✅ Non-owner DELETE doesn't remove BrickSet (403 verified)"
+echo "  ✅ Delete idempotence (second DELETE returns 404)"
 echo ""
 print_info "Database cleaned after tests"
 echo ""

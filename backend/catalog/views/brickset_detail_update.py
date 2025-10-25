@@ -12,6 +12,7 @@ from catalog.serializers.brickset_detail import BrickSetDetailSerializer
 from catalog.serializers.brickset_update import UpdateBrickSetSerializer
 from catalog.services.brickset_detail_service import BrickSetDetailService
 from catalog.services.brickset_update_service import UpdateBrickSetService
+from catalog.services.brickset_delete_service import DeleteBrickSetService
 
 
 _DETAIL_KEY = "detail"
@@ -19,7 +20,7 @@ _AUTH_ERROR_MSG = "Authentication credentials were not provided."
 
 
 class BrickSetDetailUpdateView(GenericAPIView):  # noqa: WPS338
-    """Handle GET and PATCH /api/v1/bricksets/{id} endpoints."""
+    """Handle GET, PATCH and DELETE /api/v1/bricksets/{id} endpoints."""
 
     permission_classes = [AllowAny]
     serializer_class = BrickSetDetailSerializer
@@ -100,3 +101,47 @@ class BrickSetDetailUpdateView(GenericAPIView):  # noqa: WPS338
         # Serialize updated DTO and return 200 OK
         response_serializer = BrickSetDetailSerializer(brickset_dto)
         return Response(response_serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request: Request, pk: int) -> Response:
+        """Delete a BrickSet.
+
+        Requires authentication. Only owner can delete. BrickSet can only be deleted
+        if no valuations from other users exist and owner's valuation has 0 likes
+        (RB-01 rule).
+
+        Path parameters:
+            - pk (int): BrickSet primary key
+
+        Returns:
+            Response: 204 No Content (no response body)
+            - 401 Unauthorized: Not authenticated
+            - 403 Forbidden: Not owner or RB-01 rule violation
+            - 404 Not Found: BrickSet with given id doesn't exist
+        """
+        # Check authentication
+        if not request.user or not request.user.is_authenticated:
+            return Response(
+                {_DETAIL_KEY: _AUTH_ERROR_MSG},
+                status=status.HTTP_401_UNAUTHORIZED,
+            )
+
+        # Execute delete service with authorization and business logic
+        service = DeleteBrickSetService()
+        try:
+            service.execute(pk, request.user)
+        except BrickSetNotFoundError as exc:
+            return Response(
+                {_DETAIL_KEY: exc.message},
+                status=status.HTTP_404_NOT_FOUND,
+            )
+        except BrickSetEditForbiddenError as exc:
+            return Response(
+                {
+                    _DETAIL_KEY: exc.message,
+                    "reason": exc.reason,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
+
+        # Return 204 No Content (no response body)
+        return Response(status=status.HTTP_204_NO_CONTENT)
