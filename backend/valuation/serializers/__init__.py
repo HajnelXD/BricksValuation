@@ -1,5 +1,6 @@
 """Valuation serializers package."""
 from valuation.serializers.like_list import LikeListItemSerializer
+from valuation.serializers.owned_valuation_list import OwnedValuationListItemSerializer
 from valuation.serializers.valuation_create import CreateValuationSerializer
 from valuation.serializers.valuation_detail import ValuationSerializer
 from valuation.serializers.valuation_list import ValuationListItemSerializer
