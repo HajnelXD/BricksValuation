@@ -1,2 +1,3 @@
 from account.services.login_service import LoginService
 from account.services.registration_service import RegistrationService
+from account.services.user_profile_service import UserProfileService
