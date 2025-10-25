@@ -30,8 +30,8 @@ An app for pricing used Lego bricks.
 #### PYTEST
 
 - Use fixtures for test setup and dependency injection
-- Use monkeypatch for mocking dependencies
-
+- Use monkeypatch for unittest.mock
+- For preparing test data use baker
 
 ### Guidelines for E2E
 
