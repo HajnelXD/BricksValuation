@@ -1,4 +1,4 @@
-"""Valuation & Like domain DTO & command models.
+"""Valuation & Like domain DTO & command models.  # noqa: WPS202
 
 Encapsulates request and response payload structures for valuation and like
 related endpoints as per API plan.
@@ -103,6 +103,26 @@ class OwnedValuationListItemDTO:
     brickset: dict  # {"id": int, "number": int}
     value: int  # noqa: WPS110 - domain field name
     currency: str
+    likes_count: int
+    created_at: datetime
+
+
+@dataclass(slots=True)
+class ValuationListItemDTO:
+    """Item for `GET /bricksets/{brickset_id}/valuations` list endpoint.
+
+    Memory-efficient DTO for paginated valuation lists. Excludes redundant
+    `brickset_id` (already in URL context) and `updated_at` (not needed in list).
+    Optimized for high-volume list operations with slots=True.
+    """
+
+    source_model: ClassVar[type[Valuation]] = Valuation
+
+    id: int
+    user_id: int
+    value: int  # noqa: WPS110 - domain field name
+    currency: str
+    comment: Optional[str]
     likes_count: int
     created_at: datetime
 

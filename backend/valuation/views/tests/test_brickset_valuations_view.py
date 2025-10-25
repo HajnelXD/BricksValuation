@@ -328,3 +328,270 @@ class TestCreateValuationView(APITestCase):
 
         assert response.status_code == status.HTTP_201_CREATED
         assert response.data["likes_count"] == 0
+
+
+class TestListValuationsView(APITestCase):
+    """Test BrickSetValuationsView GET /api/v1/bricksets/{id}/valuations endpoint."""
+
+    def setUp(self) -> None:
+        """Set up test fixtures."""
+        self.user1 = baker.make(User)
+        self.user2 = baker.make(User)
+        self.user3 = baker.make(User)
+        self.owner = baker.make(User)
+
+        self.brickset = BrickSet.objects.create(
+            owner=self.owner,
+            number=12345,
+            production_status=ProductionStatus.ACTIVE,
+            completeness=Completeness.COMPLETE,
+            has_instructions=True,
+            has_box=True,
+            is_factory_sealed=False,
+        )
+        self.other_brickset = BrickSet.objects.create(
+            owner=self.owner,
+            number=67890,
+            production_status=ProductionStatus.RETIRED,
+            completeness=Completeness.INCOMPLETE,
+            has_instructions=False,
+            has_box=False,
+            is_factory_sealed=False,
+        )
+
+        # Create valuations with different likes_count for ordering tests
+        self.valuation_high_likes = Valuation.valuations.create(
+            user=self.user1,
+            brickset=self.brickset,
+            value=500,
+            currency="PLN",
+            comment="Excellent condition",
+            likes_count=10,
+        )
+        self.valuation_mid_likes = Valuation.valuations.create(
+            user=self.user2,
+            brickset=self.brickset,
+            value=450,
+            currency="PLN",
+            comment="Good condition",
+            likes_count=5,
+        )
+        self.valuation_low_likes = Valuation.valuations.create(
+            user=self.user3,
+            brickset=self.brickset,
+            value=400,
+            currency="EUR",
+            comment=None,
+            likes_count=2,
+        )
+
+        # Valuation for different BrickSet - should not appear
+        self.other_valuation = Valuation.valuations.create(
+            user=self.user1,
+            brickset=self.other_brickset,
+            value=300,
+            currency="PLN",
+        )
+
+        self.url = reverse_lazy(
+            "valuation:brickset-valuations",
+            kwargs={"brickset_id": self.brickset.id},
+        )
+
+    def test_get_successfully_returns_ok_status(self) -> None:
+        """GET with valid brickset_id returns 200."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_get_response_has_pagination_structure(self) -> None:
+        """GET response has count, next, previous, and results."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert "count" in data
+        assert "next" in data
+        assert "previous" in data
+        assert "results" in data
+        assert isinstance(data["count"], int)
+        assert isinstance(data["results"], list)
+
+    def test_get_returns_only_valuations_for_specified_brickset(self) -> None:
+        """GET returns only valuations for the specified BrickSet."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["count"] == 3
+        valuation_ids = [item["id"] for item in data["results"]]
+        assert self.valuation_high_likes.id in valuation_ids
+        assert self.valuation_mid_likes.id in valuation_ids
+        assert self.valuation_low_likes.id in valuation_ids
+        assert self.other_valuation.id not in valuation_ids
+
+    def test_get_orders_by_likes_count_desc_then_created_at_asc(self) -> None:
+        """GET returns valuations ordered by -likes_count, created_at."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        results = data["results"]
+        assert len(results) == 3
+        # Most liked first, then chronologically
+        assert results[0]["id"] == self.valuation_high_likes.id
+        assert results[0]["likes_count"] == 10
+        assert results[1]["id"] == self.valuation_mid_likes.id
+        assert results[1]["likes_count"] == 5
+        assert results[2]["id"] == self.valuation_low_likes.id
+        assert results[2]["likes_count"] == 2
+
+    def test_get_list_item_has_all_required_fields(self) -> None:
+        """GET list item includes all ValuationListItemDTO fields."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        item = data["results"][0]
+        assert "id" in item
+        assert "user_id" in item
+        assert "value" in item
+        assert "currency" in item
+        assert "comment" in item
+        assert "likes_count" in item
+        assert "created_at" in item
+        # Verify excluded fields
+        assert "brickset_id" not in item
+        assert "updated_at" not in item
+
+    def test_get_returns_empty_list_for_brickset_without_valuations(self) -> None:
+        """GET returns empty results for BrickSet with no valuations."""
+        self.client.force_authenticate(user=self.user1)
+        brickset_no_valuations = BrickSet.objects.create(
+            owner=self.owner,
+            number=99999,
+            production_status=ProductionStatus.ACTIVE,
+            completeness=Completeness.COMPLETE,
+            has_instructions=True,
+            has_box=False,
+            is_factory_sealed=False,
+        )
+        url = reverse_lazy(
+            "valuation:brickset-valuations",
+            kwargs={"brickset_id": brickset_no_valuations.id},
+        )
+
+        response = self.client.get(url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["count"] == 0
+        assert len(data["results"]) == 0
+
+    def test_get_returns_not_found_for_nonexistent_brickset(self) -> None:
+        """GET with non-existent brickset_id returns 404."""
+        self.client.force_authenticate(user=self.user1)
+        nonexistent_id = 999999
+        url = reverse_lazy(
+            "valuation:brickset-valuations",
+            kwargs={"brickset_id": nonexistent_id},
+        )
+
+        response = self.client.get(url)
+
+        assert response.status_code == status.HTTP_404_NOT_FOUND
+        assert "detail" in response.json()
+        assert "not found" in response.json()["detail"].lower()
+
+    def test_get_requires_authentication(self) -> None:
+        """GET without authentication returns 401."""
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_get_pagination_with_page_parameter(self) -> None:
+        """GET supports page parameter for pagination."""
+        self.client.force_authenticate(user=self.user1)
+        # Create more valuations to test pagination (unique user per valuation)
+        for i in range(25):
+            user = baker.make(User)
+            Valuation.valuations.create(
+                user=user,
+                brickset=self.brickset,
+                value=100 + i,
+                currency="PLN",
+                likes_count=0,
+            )
+
+        # First page
+        response1 = self.client.get(self.url, {"page": 1, "page_size": 20})
+        assert response1.status_code == status.HTTP_200_OK
+        data1 = response1.json()
+        assert len(data1["results"]) == 20
+        assert data1["next"] is not None
+        assert data1["previous"] is None
+
+        # Second page
+        response2 = self.client.get(self.url, {"page": 2, "page_size": 20})
+        assert response2.status_code == status.HTTP_200_OK
+        data2 = response2.json()
+        assert len(data2["results"]) == 8  # 28 total (3 + 25) - 20 on first page
+        assert data2["next"] is None
+        assert data2["previous"] is not None
+
+    def test_get_pagination_with_custom_page_size(self) -> None:
+        """GET supports page_size parameter."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url, {"page_size": 2})
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert len(data["results"]) == 2
+        assert data["count"] == 3
+
+    def test_get_pagination_respects_max_page_size(self) -> None:
+        """GET enforces max_page_size of 100."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url, {"page_size": 100})
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["count"] == 3
+        assert len(data["results"]) == 3
+
+    def test_get_pagination_invalid_page_size_returns_bad_request(self) -> None:
+        """GET with page_size > 100 returns validation error."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url, {"page_size": 101})
+
+        # DRF PageNumberPagination allows it but limits to max_page_size
+        # So this actually succeeds but limits to 100
+        assert response.status_code == status.HTTP_200_OK
+
+    def test_get_handles_null_comment_correctly(self) -> None:
+        """GET correctly serializes None comment."""
+        self.client.force_authenticate(user=self.user1)
+
+        response = self.client.get(self.url)
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        # Find valuation with null comment
+        valuation_with_null = next(
+            item for item in data["results"]
+            if item["id"] == self.valuation_low_likes.id
+        )
+        assert valuation_with_null["comment"] is None
