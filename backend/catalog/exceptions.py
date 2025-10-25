@@ -19,3 +19,12 @@ class BrickSetDuplicateError(Exception):
         super().__init__("BrickSet with this combination already exists.")
         self.constraint = constraint
         self.message = "BrickSet with this combination already exists."
+
+
+class BrickSetNotFoundError(Exception):
+    """Raised when BrickSet with given id does not exist."""
+
+    def __init__(self, brickset_id: int) -> None:
+        super().__init__(f"BrickSet with id {brickset_id} not found.")
+        self.brickset_id = brickset_id
+        self.message = f"BrickSet with id {brickset_id} not found."
