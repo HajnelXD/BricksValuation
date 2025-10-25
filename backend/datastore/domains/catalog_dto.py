@@ -88,8 +88,6 @@ class BrickSetListItemDTO:
     valuations_count: int  # derived COUNT
     total_likes: int       # derived SUM(likes_count)
     top_valuation: Optional[TopValuationSummaryDTO]
-    created_at: datetime
-    updated_at: datetime
 
 
 @dataclass(slots=True)
