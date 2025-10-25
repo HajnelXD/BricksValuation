@@ -1,4 +1,4 @@
-"""Valuation & Like domain DTO & command models.
+"""Valuation & Like domain DTO & command models.  # noqa: WPS202
 
 Encapsulates request and response payload structures for valuation and like
 related endpoints as per API plan.
@@ -43,15 +43,31 @@ class LikeValuationCommand:
 
 
 @dataclass(slots=True)
-class UnlikeValuationCommand:
-    """Command for `DELETE /valuations/{valuation_id}/likes`.
+class CreateLikeCommand:
+    """Input for `POST /valuations/{valuation_id}/likes` service layer.
 
-    Represented for symmetry; may resolve to deletion of Like record.
+    Extends LikeValuationCommand with user_id from request.user for service processing.
+    Combines path parameter (valuation_id) with authenticated user context (user_id).
     """
 
     source_model: ClassVar[type[Like]] = Like
 
     valuation_id: int
+    user_id: int
+
+
+@dataclass(slots=True)
+class UnlikeValuationCommand:
+    """Command for `DELETE /valuations/{valuation_id}/likes`.
+
+    Represented for symmetry; may resolve to deletion of Like record.
+    Combines path parameter (valuation_id) with authenticated user context (user_id).
+    """
+
+    source_model: ClassVar[type[Like]] = Like
+
+    valuation_id: int
+    user_id: int
 
 # ----------------------------- DTO Models -----------------------------
 
@@ -61,6 +77,7 @@ class ValuationDTO:
     """Valuation representation for create success and API payloads.
 
     `updated_at` can remain unset for list endpoints to keep payload compact.
+    Use ValuationDetailDTO for detail endpoints that require full timestamps.
     """
 
     source_model: ClassVar[type[Valuation]] = Valuation
@@ -74,6 +91,27 @@ class ValuationDTO:
     likes_count: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+
+@dataclass(slots=True)
+class ValuationDetailDTO:
+    """Valuation representation for GET /valuations/{id} detail endpoint.
+
+    Extends ValuationDTO with required updated_at timestamp for detail responses.
+    Used exclusively for detail endpoint to keep response complete with all metadata.
+    """
+
+    source_model: ClassVar[type[Valuation]] = Valuation
+
+    id: int
+    brickset_id: int
+    user_id: int
+    value: int  # noqa: WPS110 - domain field name
+    currency: str
+    comment: Optional[str]
+    likes_count: int
+    created_at: datetime
+    updated_at: datetime
 
 
 @dataclass(slots=True)
@@ -104,6 +142,42 @@ class OwnedValuationListItemDTO:
     value: int  # noqa: WPS110 - domain field name
     currency: str
     likes_count: int
+    created_at: datetime
+
+
+@dataclass(slots=True)
+class ValuationListItemDTO:
+    """Item for `GET /bricksets/{brickset_id}/valuations` list endpoint.
+
+    Memory-efficient DTO for paginated valuation lists. Excludes redundant
+    `brickset_id` (already in URL context) and `updated_at` (not needed in list).
+    Optimized for high-volume list operations with slots=True.
+    """
+
+    source_model: ClassVar[type[Valuation]] = Valuation
+
+    id: int
+    user_id: int
+    value: int  # noqa: WPS110 - domain field name
+    currency: str
+    comment: Optional[str]
+    likes_count: int
+    created_at: datetime
+
+
+@dataclass(slots=True)
+class LikeListItemDTO:
+    """Item for `GET /valuations/{valuation_id}/likes` list endpoint.
+
+    Memory-efficient DTO for paginated like lists. Contains minimal user reference
+    and creation timestamp. Excludes valuation_id (already in URL context) and
+    updated_at (not needed in list). Optimized for high-volume list operations
+    with slots=True.
+    """
+
+    source_model: ClassVar[type[Like]] = Like
+
+    user_id: int
     created_at: datetime
 
 # ----------------------------- Metrics DTO ----------------------------
