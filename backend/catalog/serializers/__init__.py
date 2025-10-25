@@ -9,3 +9,6 @@ from catalog.serializers.brickset_detail import (  # noqa: F401
     ValuationInlineSerializer,
     BrickSetDetailSerializer,
 )
+from catalog.serializers.brickset_update import (  # noqa: F401
+    UpdateBrickSetSerializer,
+)

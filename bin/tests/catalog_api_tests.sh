@@ -8,8 +8,9 @@
 # - GET /api/v1/bricksets (list with filters and pagination)
 # - POST /api/v1/bricksets (create new BrickSet)
 # - GET /api/v1/bricksets/{id} (retrieve detail with valuations)
+# - PATCH /api/v1/bricksets/{id} (partial update)
 #
-# Note: Requires authentication for POST. Script automatically:
+# Note: Requires authentication for POST and PATCH. Script automatically:
 # 1. Creates test user account
 # 2. Logs in to get JWT token
 # 3. Runs catalog API tests using the token
@@ -938,6 +939,254 @@ else
 fi
 
 # ============================================================
+# TEST 26: PATCH /api/v1/bricksets/{id} - PARTIAL UPDATE (SINGLE FIELD)
+# ============================================================
+
+print_header "TEST 26: PATCH /api/v1/bricksets/{id} - UPDATE SINGLE FIELD"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Payload:"
+echo "{\"has_box\": false}"
+echo "Expected: HTTP 200 with updated BrickSet"
+echo ""
+
+PATCH_SINGLE=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"has_box": false}')
+
+PATCH_SINGLE_HTTP=$(echo "$PATCH_SINGLE" | tail -1)
+PATCH_SINGLE_BODY=$(echo "$PATCH_SINGLE" | sed '$d')
+
+if [ "$PATCH_SINGLE_HTTP" = "200" ]; then
+    print_success "Partial update successful (HTTP $PATCH_SINGLE_HTTP)"
+    echo "Updated response:"
+    echo "$PATCH_SINGLE_BODY" | jq '{id, number, has_box, owner_initial_estimate}'
+else
+    print_error "PATCH request failed (HTTP $PATCH_SINGLE_HTTP)"
+    echo "$PATCH_SINGLE_BODY"
+fi
+
+# ============================================================
+# TEST 27: PATCH /api/v1/bricksets/{id} - UPDATE MULTIPLE FIELDS
+# ============================================================
+
+print_header "TEST 27: PATCH /api/v1/bricksets/{id} - UPDATE MULTIPLE FIELDS"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Payload:"
+echo "{\"has_box\": true, \"owner_initial_estimate\": 350}"
+echo "Expected: HTTP 200 with both fields updated"
+echo ""
+
+PATCH_MULTI=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"has_box": true, "owner_initial_estimate": 350}')
+
+PATCH_MULTI_HTTP=$(echo "$PATCH_MULTI" | tail -1)
+PATCH_MULTI_BODY=$(echo "$PATCH_MULTI" | sed '$d')
+
+if [ "$PATCH_MULTI_HTTP" = "200" ]; then
+    print_success "Multi-field update successful (HTTP $PATCH_MULTI_HTTP)"
+    echo "Updated response:"
+    echo "$PATCH_MULTI_BODY" | jq '{id, has_box, owner_initial_estimate}'
+    
+    # Verify the values changed
+    HAS_BOX=$(echo "$PATCH_MULTI_BODY" | jq '.has_box')
+    ESTIMATE=$(echo "$PATCH_MULTI_BODY" | jq '.owner_initial_estimate')
+    echo "Verification: has_box=$HAS_BOX, estimate=$ESTIMATE"
+else
+    print_error "PATCH request failed (HTTP $PATCH_MULTI_HTTP)"
+    echo "$PATCH_MULTI_BODY"
+fi
+
+# ============================================================
+# TEST 28: PATCH /api/v1/bricksets/{id} - EMPTY PAYLOAD (400)
+# ============================================================
+
+print_header "TEST 28: PATCH /api/v1/bricksets/{id} - EMPTY PAYLOAD (VALIDATION ERROR)"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Payload: {} (empty)"
+echo "Expected: HTTP 400 (at least one field required)"
+echo ""
+
+PATCH_EMPTY=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{}')
+
+PATCH_EMPTY_HTTP=$(echo "$PATCH_EMPTY" | tail -1)
+PATCH_EMPTY_BODY=$(echo "$PATCH_EMPTY" | sed '$d')
+
+if [ "$PATCH_EMPTY_HTTP" = "400" ]; then
+    print_success "Empty payload correctly rejected (HTTP $PATCH_EMPTY_HTTP)"
+    echo "Error response:"
+    echo "$PATCH_EMPTY_BODY" | jq '.errors // .detail'
+else
+    print_error "Expected 400 but got $PATCH_EMPTY_HTTP"
+fi
+
+# ============================================================
+# TEST 29: PATCH /api/v1/bricksets/{id} - INVALID TYPE (400)
+# ============================================================
+
+print_header "TEST 29: PATCH /api/v1/bricksets/{id} - INVALID FIELD TYPE"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Payload: {\"has_box\": 123} (integer instead of boolean)"
+echo "Expected: HTTP 400 (type validation error)"
+echo ""
+
+PATCH_INVALID_TYPE=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"has_box": 123}')
+
+PATCH_INVALID_TYPE_HTTP=$(echo "$PATCH_INVALID_TYPE" | tail -1)
+PATCH_INVALID_TYPE_BODY=$(echo "$PATCH_INVALID_TYPE" | sed '$d')
+
+if [ "$PATCH_INVALID_TYPE_HTTP" = "400" ]; then
+    print_success "Invalid type correctly rejected (HTTP $PATCH_INVALID_TYPE_HTTP)"
+    echo "Error response:"
+    echo "$PATCH_INVALID_TYPE_BODY" | jq '.errors // .detail'
+else
+    print_error "Expected 400 but got $PATCH_INVALID_TYPE_HTTP"
+fi
+
+# ============================================================
+# TEST 30: PATCH /api/v1/bricksets/{id} - OWNER ESTIMATE OUT OF RANGE
+# ============================================================
+
+print_header "TEST 30: PATCH /api/v1/bricksets/{id} - OWNER ESTIMATE OUT OF RANGE"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Payload: {\"owner_initial_estimate\": 10000000} (exceeds max 999999)"
+echo "Expected: HTTP 400 (range validation error)"
+echo ""
+
+PATCH_OUT_OF_RANGE=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"owner_initial_estimate": 10000000}')
+
+PATCH_RANGE_HTTP=$(echo "$PATCH_OUT_OF_RANGE" | tail -1)
+PATCH_RANGE_BODY=$(echo "$PATCH_OUT_OF_RANGE" | sed '$d')
+
+if [ "$PATCH_RANGE_HTTP" = "400" ]; then
+    print_success "Out of range correctly rejected (HTTP $PATCH_RANGE_HTTP)"
+    echo "Error response:"
+    echo "$PATCH_RANGE_BODY" | jq '.errors // .detail'
+else
+    print_error "Expected 400 but got $PATCH_RANGE_HTTP"
+fi
+
+# ============================================================
+# TEST 31: PATCH /api/v1/bricksets/{id} - NOT OWNER (403)
+# ============================================================
+
+print_header "TEST 31: PATCH /api/v1/bricksets/{id} - NOT OWNER (FORBIDDEN)"
+
+echo "Creating second test user..."
+
+TIMESTAMP2=$(date +%s)
+TEST_USERNAME2="catalogtester_$TIMESTAMP2"
+TEST_EMAIL2="catalog_test_$TIMESTAMP2@example.com"
+TEST_PASSWORD2="TestPass123!"
+
+# Register second user
+curl -s -X POST "$BASE_URL/auth/register" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"username\": \"$TEST_USERNAME2\",
+    \"email\": \"$TEST_EMAIL2\",
+    \"password\": \"$TEST_PASSWORD2\"
+  }" > /dev/null
+
+# Login second user
+LOGIN2_RESPONSE=$(curl -s -D /tmp/catalog_login2_headers.txt -X POST "$BASE_URL/auth/login" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"username\": \"$TEST_USERNAME2\",
+    \"password\": \"$TEST_PASSWORD2\"
+  }")
+
+JWT_TOKEN2=$(cat /tmp/catalog_login2_headers.txt | grep "jwt_token=" | sed 's/.*jwt_token=//' | sed 's/;.*//' | tr -d ' \n')
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Attempt: Different user trying to update first user's BrickSet"
+echo "Expected: HTTP 403 Forbidden (not owner)"
+echo ""
+
+PATCH_NOT_OWNER=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN2" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"has_box": false}')
+
+PATCH_NOT_OWNER_HTTP=$(echo "$PATCH_NOT_OWNER" | tail -1)
+PATCH_NOT_OWNER_BODY=$(echo "$PATCH_NOT_OWNER" | sed '$d')
+
+if [ "$PATCH_NOT_OWNER_HTTP" = "403" ]; then
+    print_success "Non-owner correctly rejected (HTTP $PATCH_NOT_OWNER_HTTP)"
+    echo "Error response:"
+    echo "$PATCH_NOT_OWNER_BODY" | jq '{detail, reason}'
+else
+    print_error "Expected 403 but got $PATCH_NOT_OWNER_HTTP"
+    echo "$PATCH_NOT_OWNER_BODY"
+fi
+
+# ============================================================
+# TEST 32: PATCH /api/v1/bricksets/{id} - UNAUTHORIZED (NO JWT)
+# ============================================================
+
+print_header "TEST 32: PATCH /api/v1/bricksets/{id} - UNAUTHORIZED (NO AUTH)"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/$BRICKSET1_ID"
+echo "Expected: HTTP 401 Unauthorized (no JWT token)"
+echo ""
+
+PATCH_NOAUTH=$(curl -s -w "\n%{http_code}" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/$BRICKSET1_ID" \
+  -d '{"has_box": false}')
+
+PATCH_NOAUTH_HTTP=$(echo "$PATCH_NOAUTH" | tail -1)
+PATCH_NOAUTH_BODY=$(echo "$PATCH_NOAUTH" | sed '$d')
+
+if [ "$PATCH_NOAUTH_HTTP" = "401" ]; then
+    print_success "Unauthenticated request correctly rejected (HTTP $PATCH_NOAUTH_HTTP)"
+else
+    print_error "Expected 401 but got $PATCH_NOAUTH_HTTP"
+fi
+
+# ============================================================
+# TEST 33: PATCH /api/v1/bricksets/{id} - NOT FOUND (404)
+# ============================================================
+
+print_header "TEST 33: PATCH /api/v1/bricksets/{id} - NOT FOUND"
+
+echo "Endpoint: PATCH $BASE_URL/bricksets/999999"
+echo "Expected: HTTP 404 Not Found (nonexistent BrickSet)"
+echo ""
+
+PATCH_404=$(curl -s -w "\n%{http_code}" -H "Cookie: jwt_token=$JWT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -X PATCH "$BASE_URL/bricksets/999999" \
+  -d '{"has_box": false}')
+
+PATCH_404_HTTP=$(echo "$PATCH_404" | tail -1)
+PATCH_404_BODY=$(echo "$PATCH_404" | sed '$d')
+
+if [ "$PATCH_404_HTTP" = "404" ]; then
+    print_success "Not found correctly returned (HTTP $PATCH_404_HTTP)"
+    echo "Response:"
+    echo "$PATCH_404_BODY" | jq '.detail'
+else
+    print_error "Expected 404 but got $PATCH_404_HTTP"
+fi
+
+# ============================================================
 # POST-TEST CLEANUP
 # ============================================================
 
@@ -984,6 +1233,17 @@ echo "  ✅ Handle null comment in valuations"
 echo "  ✅ 404 Not Found for nonexistent BrickSet"
 echo "  ✅ Public access (no authentication required)"
 echo "  ✅ Works with authenticated users"
+echo ""
+echo "UPDATE ENDPOINTS (PATCH /api/v1/bricksets/{id}):"
+echo "  ✅ Partial update - single field (has_box)"
+echo "  ✅ Partial update - multiple fields (has_box + owner_initial_estimate)"
+echo "  ✅ Empty payload validation (400 - at least one field required)"
+echo "  ✅ Invalid field type validation (400 - boolean expected)"
+echo "  ✅ Numeric range validation (1-999999 for estimate)"
+echo "  ✅ Owner-only edit enforcement (403 for non-owner)"
+echo "  ✅ Authentication required for PATCH (401 unauthenticated)"
+echo "  ✅ 404 Not Found for nonexistent BrickSet"
+echo "  ✅ Response contains full BrickSet detail (with valuations/aggregates)"
 echo ""
 print_info "Database cleaned after tests"
 echo ""

@@ -1,0 +1,140 @@
+"""Tests for UpdateBrickSetSerializer."""
+from __future__ import annotations
+
+from django.test import TestCase
+
+from catalog.serializers.brickset_update import UpdateBrickSetSerializer
+from datastore.domains.catalog_dto import UpdateBrickSetCommand
+
+
+class UpdateBrickSetSerializerTests(TestCase):
+    """Test UpdateBrickSetSerializer field validation and to_command() conversion."""
+
+    def test_serializer_validates_has_box_true(self) -> None:
+        """Serializer accepts has_box=True."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": True})
+        assert serializer.is_valid()
+        assert serializer.validated_data["has_box"] is True
+
+    def test_serializer_validates_has_box_false(self) -> None:
+        """Serializer accepts has_box=False."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": False})
+        assert serializer.is_valid()
+        assert serializer.validated_data["has_box"] is False
+
+    def test_serializer_rejects_has_box_non_boolean(self) -> None:
+        """Serializer rejects has_box with non-boolean value."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": "yes"})
+        assert not serializer.is_valid()
+        assert "has_box" in serializer.errors
+
+    def test_serializer_validates_owner_initial_estimate_min_value(self) -> None:
+        """Serializer accepts owner_initial_estimate at minimum value (1)."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 1})
+        assert serializer.is_valid()
+        assert serializer.validated_data["owner_initial_estimate"] == 1
+
+    def test_serializer_validates_owner_initial_estimate_max_value(self) -> None:
+        """Serializer accepts owner_initial_estimate at maximum value (999999)."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 999999})
+        assert serializer.is_valid()
+        assert serializer.validated_data["owner_initial_estimate"] == 999999
+
+    def test_serializer_rejects_owner_initial_estimate_below_min(self) -> None:
+        """Serializer rejects owner_initial_estimate below minimum (0)."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 0})
+        assert not serializer.is_valid()
+        assert "owner_initial_estimate" in serializer.errors
+
+    def test_serializer_rejects_owner_initial_estimate_above_max(self) -> None:
+        """Serializer rejects owner_initial_estimate above maximum (1000000)."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 1_000_000})
+        assert not serializer.is_valid()
+        assert "owner_initial_estimate" in serializer.errors
+
+    def test_serializer_accepts_null_owner_initial_estimate(self) -> None:
+        """Serializer accepts owner_initial_estimate=null (clear estimate)."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": None})
+        assert serializer.is_valid()
+        assert serializer.validated_data["owner_initial_estimate"] is None
+
+    def test_serializer_requires_at_least_one_field(self) -> None:
+        """Serializer rejects empty data (no fields provided)."""
+        serializer = UpdateBrickSetSerializer(data={})
+        assert not serializer.is_valid()
+        assert "non_field_errors" in serializer.errors
+
+    def test_serializer_accepts_only_has_box(self) -> None:
+        """Serializer accepts payload with only has_box field."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": True})
+        assert serializer.is_valid()
+        assert "has_box" in serializer.validated_data
+        assert "owner_initial_estimate" not in serializer.validated_data
+
+    def test_serializer_accepts_only_owner_initial_estimate(self) -> None:
+        """Serializer accepts payload with only owner_initial_estimate field."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 500})
+        assert serializer.is_valid()
+        assert "owner_initial_estimate" in serializer.validated_data
+        assert "has_box" not in serializer.validated_data
+
+    def test_serializer_accepts_both_fields(self) -> None:
+        """Serializer accepts payload with both fields."""
+        data = {"has_box": False, "owner_initial_estimate": 450}
+        serializer = UpdateBrickSetSerializer(data=data)
+        assert serializer.is_valid()
+        assert serializer.validated_data["has_box"] is False
+        assert serializer.validated_data["owner_initial_estimate"] == 450
+
+    def test_to_command_returns_update_brickset_command(self) -> None:
+        """to_command() returns UpdateBrickSetCommand instance."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": True})
+        serializer.is_valid()
+
+        command = serializer.to_command()
+
+        assert isinstance(command, UpdateBrickSetCommand)
+        assert command.has_box is True
+
+    def test_to_command_includes_provided_fields_only(self) -> None:
+        """to_command() includes only provided fields in command."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 300})
+        serializer.is_valid()
+
+        command = serializer.to_command()
+
+        assert command.owner_initial_estimate == 300
+        assert command.has_box is None
+
+    def test_to_command_raises_assertion_error_if_not_validated(self) -> None:
+        """to_command() raises AssertionError if serializer not validated."""
+        serializer = UpdateBrickSetSerializer(data={"has_box": True})
+        # Don't call is_valid()
+
+        with self.assertRaises(AssertionError):
+            serializer.to_command()
+
+    def test_serializer_ignores_extra_fields(self) -> None:
+        """Serializer ignores extra fields not in schema."""
+        data = {
+            "has_box": True,
+            "extra_field": "should_be_ignored",
+            "number": 999,
+        }
+        serializer = UpdateBrickSetSerializer(data=data)
+        assert serializer.is_valid()
+        assert "extra_field" not in serializer.validated_data
+        assert "number" not in serializer.validated_data
+        assert "has_box" in serializer.validated_data
+
+    def test_serializer_rejects_owner_initial_estimate_non_integer(self) -> None:
+        """Serializer rejects owner_initial_estimate with non-integer value."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": "expensive"})
+        assert not serializer.is_valid()
+        assert "owner_initial_estimate" in serializer.errors
+
+    def test_serializer_rejects_owner_initial_estimate_float(self) -> None:
+        """Serializer rejects owner_initial_estimate with float value."""
+        serializer = UpdateBrickSetSerializer(data={"owner_initial_estimate": 123.45})
+        assert not serializer.is_valid()
+        assert "owner_initial_estimate" in serializer.errors
