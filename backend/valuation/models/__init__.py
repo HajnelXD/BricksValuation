@@ -1,5 +1,3 @@
-"""Valuation app models export."""
-
-from .valuation import Valuation  # noqa: F401, WPS300
-from .like import Like  # noqa: F401, WPS300
-from .metrics import SystemMetrics  # noqa: F401, WPS300
+from valuation.models.like import Like
+from valuation.models.metrics import SystemMetrics
+from valuation.models.valuation import Valuation

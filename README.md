@@ -17,3 +17,11 @@ To run the frontend linter, use the following command:
 ```bash
 ./bin/lint_frontend.sh
 ```
+
+## Backend Tests
+
+To run the backend tests, execute:
+
+```bash
+./bin/test_backend.sh
+```

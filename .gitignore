@@ -509,5 +509,6 @@ yarn-error.log
 .idea/
 ./idea
 .vscode/
+coverage_html/
 
 # End of https://www.toptal.com/developers/gitignore/api/venv,python,pycharm,webstorm,visualstudiocode,django,git

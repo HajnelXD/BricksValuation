@@ -8,13 +8,12 @@ attribute creation.
 """
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar, Optional
 
 from account.models import User
 
-# --------------------------- Command Models ---------------------------
 
 @dataclass(slots=True)
 class RegisterUserCommand:
@@ -41,8 +40,6 @@ class LoginCommand:
     username: str
     password: str
 
-
-# ----------------------------- DTO Models -----------------------------
 
 @dataclass(slots=True)
 class UserRefDTO:
@@ -83,4 +80,3 @@ class LoginSuccessDTO:
 
     user: UserRefDTO
     token: Optional[str] = None
-

@@ -9,12 +9,12 @@ from dataclasses import dataclass
 from datetime import datetime
 from typing import ClassVar, Optional
 
-from catalog.models import BrickSet, ProductionStatus, Completeness
+from catalog.models import BrickSet
 
 # Forward reference to valuation DTO for top valuation summary
 
-
 # --------------------------- Command Models ---------------------------
+
 
 @dataclass(slots=True)
 class CreateBrickSetCommand:
@@ -48,8 +48,8 @@ class UpdateBrickSetCommand:
     has_box: Optional[bool] = None
     owner_initial_estimate: Optional[int] = None
 
-
 # ----------------------------- DTO Models -----------------------------
+
 
 @dataclass(slots=True)
 class TopValuationSummaryDTO:
@@ -60,7 +60,7 @@ class TopValuationSummaryDTO:
     """
 
     id: int
-    value: int
+    value: int  # noqa: WPS110 - mirrors domain field name
     currency: str
     likes_count: int
     user_id: int
@@ -102,7 +102,7 @@ class ValuationInlineDTO:
 
     id: int
     user_id: int
-    value: int
+    value: int  # noqa: WPS110 - mirrors domain field name
     currency: str
     comment: Optional[str]
     likes_count: int
@@ -151,4 +151,3 @@ class OwnedBrickSetListItemDTO:
     valuations_count: int
     total_likes: int
     editable: bool  # derived from RB-01 rule logic
-
