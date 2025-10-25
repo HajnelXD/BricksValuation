@@ -86,6 +86,7 @@ class BrickSet(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True, db_index=True)
 
+    objects = BrickSetQuerySet.as_manager()  # default manager
     bricksets = BrickSetQuerySet.as_manager()  # custom manager name (avoid WPS110)
 
     class Meta:

@@ -15,6 +15,8 @@ class BrickSetFilterSerializer(serializers.Serializer):
     """
 
     ORDERING_CHOICES = [
+        "number",
+        "-number",
         "created_at",
         "-created_at",
         "valuations_count",
