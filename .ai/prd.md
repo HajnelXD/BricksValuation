@@ -300,7 +300,6 @@ M2 Odsetek aktywnych użytkowników = (Użytkownicy, którzy dodali zestaw lub w
 
 6.3 Sposób zbierania metryk
 - Liczniki aktualizowane przy dodaniu/wycenie/lajku (FR-19).
-- Raport generowany na żądanie (np. endpoint /metrics lub sekcja panelu). 
 - Dane mogą być przechowywane w pamięci (MVP) – brak trwałej analityki (ograniczenie).
 
 6.4 Harmonogram oceny
