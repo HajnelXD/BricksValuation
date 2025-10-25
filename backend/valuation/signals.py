@@ -42,10 +42,10 @@ def _touch_metrics() -> None:
 
     # serviced_sets definition per db-plan using EXISTS subqueries
     val_not_owner = (
-        Valuation.objects.filter(brickset_id=models.OuterRef("pk"))
+        Valuation.valuations.filter(brickset_id=models.OuterRef("pk"))
         .exclude(user_id=models.F("brickset__owner_id"))
     )
-    val_owner_liked = Valuation.objects.filter(
+    val_owner_liked = Valuation.valuations.filter(
         brickset_id=models.OuterRef("pk"), user_id=models.F("brickset__owner_id"), likes_count__gt=0
     )
     metrics.serviced_sets = (
@@ -61,7 +61,7 @@ def _touch_metrics() -> None:
 def increment_likes_count(sender, instance: Like, created: bool, **kwargs) -> None:
     if not created:
         return
-    Valuation.objects.filter(pk=instance.valuation_id).update(
+    Valuation.valuations.filter(pk=instance.valuation_id).update(
         likes_count=models.F("likes_count") + 1,
     )
     _touch_metrics()
@@ -69,10 +69,11 @@ def increment_likes_count(sender, instance: Like, created: bool, **kwargs) -> No
 
 @receiver(models.signals.post_delete,  sender=Like)
 def decrement_likes_count(sender, instance: Like, **kwargs) -> None:
-    Valuation.objects.filter(pk=instance.valuation_id).update(
+    Valuation.valuations.filter(pk=instance.valuation_id).update(
         likes_count=models.Case(
             models.When(likes_count__gt=0, then=models.F("likes_count") - 1),
             default=models.F("likes_count"),
+            output_field=models.PositiveIntegerField(),
         ),
     )
     _touch_metrics()

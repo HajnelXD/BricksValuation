@@ -43,6 +43,20 @@ class LikeValuationCommand:
 
 
 @dataclass(slots=True)
+class CreateLikeCommand:
+    """Input for `POST /valuations/{valuation_id}/likes` service layer.
+
+    Extends LikeValuationCommand with user_id from request.user for service processing.
+    Combines path parameter (valuation_id) with authenticated user context (user_id).
+    """
+
+    source_model: ClassVar[type[Like]] = Like
+
+    valuation_id: int
+    user_id: int
+
+
+@dataclass(slots=True)
 class UnlikeValuationCommand:
     """Command for `DELETE /valuations/{valuation_id}/likes`.
 

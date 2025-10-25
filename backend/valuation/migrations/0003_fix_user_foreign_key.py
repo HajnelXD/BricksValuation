@@ -48,6 +48,9 @@ class Migration(migrations.Migration):
                 
                 ALTER TABLE valuation_like
                 DROP CONSTRAINT IF EXISTS valuation_like_user_id_73bf7fa7_fk_auth_user_id;
+                
+                ALTER TABLE valuation_like
+                DROP CONSTRAINT IF EXISTS valuation_like_user_id_e1a64bd6_fk_auth_user_id;
             """,
             reverse_sql=migrations.RunSQL.noop,
         ),

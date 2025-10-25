@@ -31,3 +31,29 @@ class ValuationNotFoundError(Exception):
         super().__init__(f"Valuation with id {valuation_id} not found.")
         self.valuation_id = valuation_id
         self.message = f"Valuation with id {valuation_id} not found."
+
+
+class LikeOwnValuationError(Exception):
+    """Raised when user attempts to like their own Valuation."""
+
+    def __init__(self, valuation_id: int) -> None:
+        super().__init__("Cannot like your own valuation.")
+        self.valuation_id = valuation_id
+        self.message = "Cannot like your own valuation."
+
+
+class LikeDuplicateError(Exception):
+    """Raised when Like violates uniqueness constraint.
+
+    Occurs when user attempts to like same Valuation twice (unique on user+valuation).
+    """
+
+    def __init__(self, valuation_id: int, user_id: int) -> None:
+        super().__init__(
+            f"Like for valuation {valuation_id} by user {user_id} already exists."
+        )
+        self.valuation_id = valuation_id
+        self.user_id = user_id
+        self.message = (
+            f"Like for valuation {valuation_id} by user {user_id} already exists."
+        )
