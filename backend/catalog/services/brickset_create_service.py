@@ -45,13 +45,19 @@ class CreateBrickSetService:
     def _persist_brickset(self, brickset: BrickSet) -> None:
         """Persist BrickSet to database within transaction.
 
-        Catches IntegrityError for unique constraint violations.
+        Catches IntegrityError for unique constraint violations only.
+        Other IntegrityError types (foreign key, check constraints) are re-raised.
         """
         try:
             with transaction.atomic():
                 brickset.save()
         except IntegrityError as exc:
-            raise BrickSetDuplicateError("brickset_global_identity") from exc
+            # Check which constraint was violated by examining error message
+            error_message = str(exc).lower()
+            if "brickset_global_identity" in error_message or "unique constraint" in error_message:
+                raise BrickSetDuplicateError("brickset_global_identity") from exc
+            # Re-raise other integrity errors (foreign key, check constraints, etc.)
+            raise
 
     @staticmethod
     def _build_dto(brickset: BrickSet) -> BrickSetListItemDTO:

@@ -11,6 +11,7 @@ BASE_URL="http://localhost:8000/api/v1"
 GREEN='\033[0;32m'
 RED='\033[0;31m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Function to print headers
@@ -28,6 +29,32 @@ print_success() {
 # Function to print error
 print_error() {
     echo -e "${RED}❌ $1${NC}"
+}
+
+# Function to print info
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+# Function to clean database
+clean_database() {
+    print_info "Cleaning test data from database..."
+    # Delete BrickSets created in tests (using number range)
+    docker-compose exec -T backend python manage.py shell -c "
+from catalog.models import BrickSet
+from account.models import User
+# Delete test BrickSets (numbers in range 1000000-9999999)
+BrickSet.objects.filter(number__gte=1000000, number__lte=9999999).delete()
+# Delete test users (username starts with 'testuser_' or 'catalogtester_')
+User.objects.filter(username__startswith='testuser_').delete()
+User.objects.filter(username__startswith='catalogtester_').delete()
+print('Test data cleaned')
+" 2>&1 > /dev/null
+    if [ $? -eq 0 ]; then
+        print_success "Test data cleaned successfully"
+    else
+        print_info "Skipping test data cleanup (container not available)"
+    fi
 }
 
 # ============================================================
@@ -409,6 +436,13 @@ fi
 print_success "Complete authentication flow successful!"
 
 # ============================================================
+# POST-TEST CLEANUP
+# ============================================================
+
+print_header "POST-TEST DATABASE CLEANUP"
+clean_database
+
+# ============================================================
 # SUMMARY
 # ============================================================
 
@@ -426,4 +460,6 @@ echo "  ✅ Logout endpoint requires authentication"
 echo "  ✅ Logout returns 204 No Content"
 echo "  ✅ Logout deletes JWT cookie"
 echo "  ✅ Full auth flow working (register → login → logout)"
+echo ""
+print_info "Database cleaned after tests"
 echo ""

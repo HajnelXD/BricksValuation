@@ -1,1 +1,1 @@
-docker compose run --rm backend python manage.py 
+docker compose run --rm backend python manage.py "$@"
