@@ -1,14 +1,15 @@
-"""Serializers for valuation detail responses."""
+"""Serializers for Valuation detail endpoint."""
 from __future__ import annotations
 
 from rest_framework import serializers
 
 
 class ValuationSerializer(serializers.Serializer):
-    """Serialize ValuationDTO to JSON for valuation responses.
+    """Serialize ValuationDetailDTO to JSON for detail responses.
 
-    Represents a single user's valuation of a BrickSet with all metadata.
-    All fields are read-only (output only).
+    Represents a full valuation with all fields including timestamps.
+    All fields are read-only (output only). Designed for GET /valuations/{id}
+    detail endpoint.
     """
 
     id = serializers.IntegerField(read_only=True)
@@ -22,7 +23,8 @@ class ValuationSerializer(serializers.Serializer):
     )
     likes_count = serializers.IntegerField(read_only=True)
     created_at = serializers.DateTimeField(read_only=True)
-    updated_at = serializers.DateTimeField(
-        read_only=True,
-        allow_null=True,
-    )
+    updated_at = serializers.DateTimeField(read_only=True)
+
+
+# Alias for semantic clarity in detail endpoint context
+ValuationDetailSerializer = ValuationSerializer

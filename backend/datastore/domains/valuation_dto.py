@@ -61,6 +61,7 @@ class ValuationDTO:
     """Valuation representation for create success and API payloads.
 
     `updated_at` can remain unset for list endpoints to keep payload compact.
+    Use ValuationDetailDTO for detail endpoints that require full timestamps.
     """
 
     source_model: ClassVar[type[Valuation]] = Valuation
@@ -74,6 +75,27 @@ class ValuationDTO:
     likes_count: int
     created_at: datetime
     updated_at: Optional[datetime] = None
+
+
+@dataclass(slots=True)
+class ValuationDetailDTO:
+    """Valuation representation for GET /valuations/{id} detail endpoint.
+
+    Extends ValuationDTO with required updated_at timestamp for detail responses.
+    Used exclusively for detail endpoint to keep response complete with all metadata.
+    """
+
+    source_model: ClassVar[type[Valuation]] = Valuation
+
+    id: int
+    brickset_id: int
+    user_id: int
+    value: int  # noqa: WPS110 - domain field name
+    currency: str
+    comment: Optional[str]
+    likes_count: int
+    created_at: datetime
+    updated_at: datetime
 
 
 @dataclass(slots=True)

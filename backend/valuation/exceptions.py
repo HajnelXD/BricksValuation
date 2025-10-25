@@ -22,3 +22,12 @@ class ValuationDuplicateError(Exception):
         super().__init__("Valuation for this BrickSet already exists.")
         self.constraint = constraint
         self.message = "Valuation for this BrickSet already exists."
+
+
+class ValuationNotFoundError(Exception):
+    """Raised when Valuation with given id does not exist."""
+
+    def __init__(self, valuation_id: int) -> None:
+        super().__init__(f"Valuation with id {valuation_id} not found.")
+        self.valuation_id = valuation_id
+        self.message = f"Valuation with id {valuation_id} not found."
