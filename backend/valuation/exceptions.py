@@ -57,3 +57,21 @@ class LikeDuplicateError(Exception):
         self.message = (
             f"Like for valuation {valuation_id} by user {user_id} already exists."
         )
+
+
+class LikeNotFoundError(Exception):
+    """Raised when Like with given valuation_id and user_id does not exist.
+
+    Occurs when user attempts to unlike a valuation they haven't liked or
+    the like has already been removed.
+    """
+
+    def __init__(self, valuation_id: int, user_id: int) -> None:
+        super().__init__(
+            f"Like for valuation {valuation_id} by user {user_id} not found."
+        )
+        self.valuation_id = valuation_id
+        self.user_id = user_id
+        self.message = (
+            f"Like for valuation {valuation_id} by user {user_id} not found."
+        )

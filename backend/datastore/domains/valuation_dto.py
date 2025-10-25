@@ -61,11 +61,13 @@ class UnlikeValuationCommand:
     """Command for `DELETE /valuations/{valuation_id}/likes`.
 
     Represented for symmetry; may resolve to deletion of Like record.
+    Combines path parameter (valuation_id) with authenticated user context (user_id).
     """
 
     source_model: ClassVar[type[Like]] = Like
 
     valuation_id: int
+    user_id: int
 
 # ----------------------------- DTO Models -----------------------------
 
