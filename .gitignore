@@ -511,4 +511,7 @@ yarn-error.log
 .vscode/
 coverage_html/
 
+### Cypress ###
+cypress/screenshots/
+
 # End of https://www.toptal.com/developers/gitignore/api/venv,python,pycharm,webstorm,visualstudiocode,django,git

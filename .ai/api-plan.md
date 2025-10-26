@@ -389,23 +389,6 @@ List my valuations (FR-15).
 ```
 - Errors: 401 NOT_AUTHENTICATED
 
-### 2.6 Metrics
-
-#### GET /api/v1/metrics/system
-System metrics (FR-19, US-018).
-- Success 200:
-```
-{
-  "total_sets": 57,
-  "serviced_sets": 44,
-  "active_users": 20,
-  "serviced_sets_ratio": 0.7719,
-  "active_users_ratio": 0.9091,
-  "updated_at": "..."
-}
-```
-- Errors: 401 NOT_AUTHENTICATED (if restricted) / 403 FORBIDDEN (if only staff) – MVP assumption: all authenticated users can view.
-
 ### 2.7 Error Handling Summary
 | HTTP | Code | Message Example |
 |------|------|-----------------|
