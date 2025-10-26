@@ -3,6 +3,8 @@
  * DTO types from API and internal ViewModel types for UI layer
  */
 
+import type { Ref, ComputedRef } from 'vue';
+
 // Enums for type safety
 export type ProductionStatus = 'ACTIVE' | 'RETIRED';
 export type Completeness = 'COMPLETE' | 'INCOMPLETE';
@@ -99,17 +101,22 @@ export const DEFAULT_FILTERS_STATE: BrickSetFiltersState = {
   pageSize: 20,
 };
 
-export const VALID_ORDERING_OPTIONS: OrderingOption[] = ['-created_at', 'created_at', '-popular', '-valuations'];
+export const VALID_ORDERING_OPTIONS: OrderingOption[] = [
+  '-created_at',
+  'created_at',
+  '-popular',
+  '-valuations',
+];
 
 /**
  * API Response wrapper for composition
  */
 export interface UseBrickSetListSearchResult {
-  items: BrickSetListItemViewModel[];
-  count: number;
-  loading: boolean;
-  error: string | null;
-  filters: BrickSetFiltersState;
+  items: Readonly<Ref<BrickSetListItemViewModel[]>>;
+  count: Readonly<Ref<number>>;
+  loading: Readonly<Ref<boolean>>;
+  error: Readonly<Ref<string | null>>;
+  filters: ComputedRef<BrickSetFiltersState>;
   setFilters: (partial: Partial<BrickSetFiltersState>) => void;
   resetFilters: () => void;
   fetch: () => Promise<void>;

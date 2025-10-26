@@ -107,4 +107,3 @@ describe('ErrorState Component', () => {
     expect(wrapper.text()).toContain(longMessage);
   });
 });
-

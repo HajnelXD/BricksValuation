@@ -13,7 +13,7 @@
 
 import { computed, watchEffect, onMounted } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
-import type { BrickSetFiltersState } from '@/types/bricksets';
+import type { BrickSetFiltersState, ProductionStatus, Completeness } from '@/types/bricksets';
 import { validateOrderingOption, parseBooleanQueryParam } from '@/mappers/bricksets';
 import { useBrickSetListSearch, buildQueryParams } from '@/composables/useBrickSetListSearch';
 import BrickSetFiltersPanel from '@/components/bricksets/BrickSetFiltersPanel.vue';
@@ -26,21 +26,42 @@ import ErrorState from '@/components/bricksets/ErrorState.vue';
 const router = useRouter();
 const route = useRoute();
 
+const PRODUCTION_STATUS_VALUES: readonly ProductionStatus[] = ['ACTIVE', 'RETIRED'];
+const COMPLETENESS_VALUES: readonly Completeness[] = ['COMPLETE', 'INCOMPLETE'];
+
+function parseEnumQuery<T extends string>(value: unknown, allowed: readonly T[]): T | null {
+  if (typeof value !== 'string') {
+    return null;
+  }
+  return allowed.includes(value as T) ? (value as T) : null;
+}
+
+function normalizeQueryParam(param: unknown): string | undefined {
+  if (Array.isArray(param)) {
+    return typeof param[0] === 'string' ? param[0] : undefined;
+  }
+  return typeof param === 'string' ? param : undefined;
+}
+
 /**
  * Initialize filters from URL query parameters
  */
 function initializeFiltersFromQuery(): Partial<BrickSetFiltersState> {
   const query = route.query;
+  const productionStatusParam = normalizeQueryParam(query.production_status);
+  const completenessParam = normalizeQueryParam(query.completeness);
+  const orderingParam = normalizeQueryParam(query.ordering);
+  const pageParam = normalizeQueryParam(query.page);
 
   return {
-    q: (query.q as string) || '',
-    production_status: (query.production_status as any) || null,
-    completeness: (query.completeness as any) || null,
-    has_instructions: parseBooleanQueryParam(query.has_instructions as string),
-    has_box: parseBooleanQueryParam(query.has_box as string),
-    is_factory_sealed: parseBooleanQueryParam(query.is_factory_sealed as string),
-    ordering: validateOrderingOption(query.ordering),
-    page: Math.max(1, parseInt(String(query.page || 1))),
+    q: normalizeQueryParam(query.q) || '',
+    production_status: parseEnumQuery(productionStatusParam, PRODUCTION_STATUS_VALUES),
+    completeness: parseEnumQuery(completenessParam, COMPLETENESS_VALUES),
+    has_instructions: parseBooleanQueryParam(normalizeQueryParam(query.has_instructions)),
+    has_box: parseBooleanQueryParam(normalizeQueryParam(query.has_box)),
+    is_factory_sealed: parseBooleanQueryParam(normalizeQueryParam(query.is_factory_sealed)),
+    ordering: validateOrderingOption(orderingParam),
+    page: Math.max(1, Number.parseInt(pageParam ?? '1', 10) || 1),
   };
 }
 
@@ -51,10 +72,9 @@ const { items, count, loading, error, filters, setFilters, resetFilters, fetch }
   });
 
 // Computed properties
-const totalPages = computed(() => Math.ceil(count / (filters.pageSize || 20)));
-const hasResults = computed(() => items.length > 0);
-const isEmpty = computed(() => !loading && count === 0);
-const hasError = computed(() => error !== null && error !== '');
+const hasResults = computed(() => items.value.length > 0);
+const isEmpty = computed(() => !loading.value && count.value === 0);
+const hasError = computed(() => error.value !== null && error.value !== '');
 
 /**
  * Synchronize filters to query parameters
@@ -95,10 +115,6 @@ function handleRetry() {
   fetch();
 }
 
-function handleEmptyStateReset() {
-  resetFilters();
-}
-
 // Trigger initial fetch on component mount (not in setup to allow async initialization)
 onMounted(() => {
   fetch();
@@ -114,6 +130,13 @@ onMounted(() => {
         <router-link to="/login" class="font-semibold underline hover:no-underline">
           {{ $t('nav.login') }}
         </router-link>
+        <br />
+        <span class="inline-flex items-center gap-2">
+          {{ $t('auth.noAccountPrompt') }}
+          <router-link to="/register" class="font-semibold underline hover:no-underline">
+            {{ $t('nav.register') }}
+          </router-link>
+        </span>
       </div>
     </div>
 
@@ -125,9 +148,7 @@ onMounted(() => {
           <h1 class="text-3xl font-bold text-gray-900">
             {{ $t('bricksets.title') }}
           </h1>
-          <p class="text-gray-600">
-            {{ count }} {{ $t('bricksets.subtitle') }}
-          </p>
+          <p class="text-gray-600">{{ count }} {{ $t('bricksets.subtitle') }}</p>
         </div>
 
         <!-- Filters and List Layout -->
@@ -145,23 +166,13 @@ onMounted(() => {
           <!-- Main Content -->
           <div class="flex-1">
             <!-- Loading State -->
-            <LoadingSkeletons
-              v-if="loading && !hasResults"
-              :count="6"
-            />
+            <LoadingSkeletons v-if="loading && !hasResults" :count="6" />
 
             <!-- Error State Component -->
-            <ErrorState
-              v-else-if="hasError"
-              :error="error"
-              @retry="handleRetry"
-            />
+            <ErrorState v-else-if="hasError" :error="error" @retry="handleRetry" />
 
             <!-- Empty State Component -->
-            <EmptyState
-              v-else-if="isEmpty"
-              @reset-filters="handleEmptyStateReset"
-            />
+            <EmptyState v-else-if="isEmpty" />
 
             <!-- List -->
             <div v-else class="space-y-4">

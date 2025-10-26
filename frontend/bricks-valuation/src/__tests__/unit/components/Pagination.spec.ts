@@ -27,7 +27,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 3 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.text()).toContain('3');
@@ -37,7 +42,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), totalPages: 9 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.text()).toContain('9');
@@ -47,7 +57,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), total: 100 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     // Component renders, total items might not be explicitly displayed in summary
@@ -58,7 +73,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 1 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     // Should have disabled state for previous button
@@ -69,7 +89,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 2 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.exists()).toBe(true);
@@ -79,7 +104,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 9, totalPages: 9 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.exists()).toBe(true);
@@ -89,7 +119,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 1, totalPages: 9 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.exists()).toBe(true);
@@ -99,7 +134,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 3 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     // Find and click previous button
@@ -119,7 +159,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 1, totalPages: 9 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     // Find and click next button
@@ -139,7 +184,12 @@ describe('Pagination Component', () => {
     const pageInfo = { ...createPageInfo(), page: 1, totalPages: 9 };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: true },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: true,
+      },
     });
 
     const buttons = wrapper.findAll('button');
@@ -160,7 +210,12 @@ describe('Pagination Component', () => {
     };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.text()).toContain('2');
@@ -176,7 +231,12 @@ describe('Pagination Component', () => {
     };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     expect(wrapper.exists()).toBe(true);
@@ -191,7 +251,12 @@ describe('Pagination Component', () => {
     };
 
     const wrapper = mount(Pagination, {
-      props: { count: pageInfo.total, page: pageInfo.page, pageSize: pageInfo.pageSize, loading: false },
+      props: {
+        count: pageInfo.total,
+        page: pageInfo.page,
+        pageSize: pageInfo.pageSize,
+        loading: false,
+      },
     });
 
     // When totalPages is 0, pagination component shouldn't render

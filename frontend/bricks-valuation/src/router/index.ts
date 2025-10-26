@@ -11,6 +11,18 @@ const routes: RouteRecordRaw[] = [
     path: '/bricksets',
     redirect: '/',
   },
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('../pages/auth/LoginView.vue'),
+    meta: { requiresGuest: true },
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('../pages/auth/RegisterView.vue'),
+    meta: { requiresGuest: true },
+  },
 ];
 
 export const router = createRouter({

@@ -46,15 +46,9 @@ function handleKeydown(event: KeyboardEvent) {
 
     <!-- Attributes Icons -->
     <div class="flex flex-wrap gap-2 mb-3">
-      <span v-if="item.hasInstructions" title="Ma instrukcje" class="text-lg">
-        📘
-      </span>
-      <span v-if="item.hasBox" title="Ma pudełko" class="text-lg">
-        📦
-      </span>
-      <span v-if="item.isFactorySealed" title="Zapieczętowany" class="text-lg">
-        🔒
-      </span>
+      <span v-if="item.hasInstructions" title="Ma instrukcje" class="text-lg"> 📘 </span>
+      <span v-if="item.hasBox" title="Ma pudełko" class="text-lg"> 📦 </span>
+      <span v-if="item.isFactorySealed" title="Zapieczętowany" class="text-lg"> 🔒 </span>
     </div>
 
     <!-- Statistics -->
@@ -70,10 +64,7 @@ function handleKeydown(event: KeyboardEvent) {
     </div>
 
     <!-- Top Valuation Snippet -->
-    <TopValuationSnippet
-      v-if="item.topValuation"
-      :valuation="item.topValuation"
-    />
+    <TopValuationSnippet v-if="item.topValuation" :valuation="item.topValuation" />
 
     <!-- Timestamp -->
     <p class="text-xs text-gray-500 mt-3">{{ item.createdAtRelative }}</p>

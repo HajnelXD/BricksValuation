@@ -4,7 +4,9 @@ import BrickSetCard from '@/components/bricksets/BrickSetCard.vue';
 import type { BrickSetCardViewModel } from '@/types/bricksets';
 
 describe('BrickSetCard Component', () => {
-  const createMockViewModel = (overrides: Partial<BrickSetCardViewModel> = {}): BrickSetCardViewModel => ({
+  const createMockViewModel = (
+    overrides: Partial<BrickSetCardViewModel> = {}
+  ): BrickSetCardViewModel => ({
     id: 1,
     number: '10001',
     productionStatusLabel: 'Aktywny',
