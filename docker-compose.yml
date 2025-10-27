@@ -24,6 +24,8 @@ services:
     volumes:
       - ./frontend/bricks-valuation:/app
       - /app/node_modules
+    env_file:
+      - env/.frontend-env
     ports:
       - "5173:5173"
     depends_on:

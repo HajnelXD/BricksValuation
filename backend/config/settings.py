@@ -39,6 +39,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
+    'corsheaders',
     'account',
     'catalog',
     'valuation',
@@ -46,6 +48,7 @@ INSTALLED_APPS = (
 
 MIDDLEWARE = (
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -141,3 +144,13 @@ REST_FRAMEWORK = {
 
 # Custom user model
 AUTH_USER_MODEL = "account.User"
+
+
+# CORS Configuration
+# Allow requests from frontend development server
+# Parse comma-separated origins from environment variable
+_cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+CORS_ALLOWED_ORIGINS = tuple(_cors_origins.split(',')) if _cors_origins else ()
+
+# Allow credentials (cookies) to be sent with CORS requests
+CORS_ALLOW_CREDENTIALS = True

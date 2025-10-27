@@ -1,18 +1,9 @@
-import { createI18n } from 'vue-i18n';
+// @ts-ignore
+import { config } from '@vue/test-utils';
 
-const messages = {
+// Mock translations dictionary
+const translations: Record<string, Record<string, Record<string, string>>> = {
   pl: {
-    app: {
-      title: 'BricksValuation',
-    },
-    nav: {
-      home: 'Start',
-      login: 'Logowanie',
-      register: 'Rejestracja',
-      sets: 'Zestawy',
-      mySets: 'Moje zestawy',
-      myValuations: 'Moje wyceny',
-    },
     common: {
       reset: 'Wyczyść filtry',
       retry: 'Spróbuj ponownie',
@@ -49,9 +40,26 @@ const messages = {
   },
 };
 
-export const i18n = createI18n({
-  locale: 'pl',
-  fallbackLocale: 'pl',
-  legacy: false,
-  messages,
-});
+// Create a mock $t function that resolves translation keys
+const mockT = (key: string): string => {
+  const parts = key.split('.');
+  let value: any = translations.pl;
+
+  for (const part of parts) {
+    value = value?.[part];
+  }
+
+  return typeof value === 'string' ? value : key;
+};
+
+// Configure global mocks and properties
+config.global.mocks = {
+  $t: mockT,
+};
+
+config.global.provide = {
+  ...config.global.provide,
+};
+
+
+
