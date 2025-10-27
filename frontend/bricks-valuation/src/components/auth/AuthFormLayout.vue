@@ -16,7 +16,7 @@ defineProps<{
 
 <template>
   <div
-    class="min-h-screen flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-8 sm:px-6 lg:px-8 transition-colors duration-200"
+    class="min-h-[calc(100vh-4rem)] w-full flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-900 px-4 py-8 sm:px-6 lg:px-8 transition-colors duration-200"
   >
     <div class="w-full max-w-sm sm:max-w-md space-y-6 sm:space-y-8">
       <!-- Header -->

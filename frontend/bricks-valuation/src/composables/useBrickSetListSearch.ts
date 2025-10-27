@@ -3,7 +3,7 @@
  * Manages BrickSet list state, filtering, fetching, and debounced search
  */
 
-import { ref, watch, computed, reactive, readonly } from 'vue';
+import { ref, watch, computed, reactive } from 'vue';
 import apiClient from '@/config/axios';
 import { env } from '@/config/env';
 import type {
@@ -27,6 +27,7 @@ function isAxiosErrorLike(error: unknown): error is AxiosErrorLike {
 
 interface UseBrickSetListSearchOptions {
   initialFilters?: Partial<BrickSetFiltersState>;
+  endpoint?: string;
 }
 
 /**
@@ -129,9 +130,9 @@ export function useBrickSetListSearch(
 
     try {
       const queryParams = buildQueryParams(filters);
-      const endpoint = `/${env.api.version}/bricksets`;
+      const endpointUrl = options.endpoint || `/v${env.api.version}/bricksets`;
 
-      const response = await apiClient.get(endpoint, {
+      const response = await apiClient.get(endpointUrl, {
         params: queryParams,
         signal: abortController.value.signal,
       });
@@ -237,10 +238,10 @@ export function useBrickSetListSearch(
   }
 
   return {
-    items: readonly(items),
-    count: readonly(count),
-    loading: readonly(loading),
-    error: readonly(error),
+    items,
+    count,
+    loading,
+    error,
     filters: computed(() => ({ ...filters })),
     setFilters,
     resetFilters,

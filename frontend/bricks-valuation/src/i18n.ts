@@ -18,12 +18,20 @@ const messages = {
     },
     login: {
       title: 'Logowanie',
-      placeholder: 'Formularz logowania jest w przygotowaniu.',
-      noAccountPrompt: 'Nie masz konta?',
-      registerCta: 'Zarejestruj się',
+      username: 'Nazwa użytkownika lub email',
+      password: 'Hasło',
+      submit: 'Zaloguj się',
+      hasAccount: 'Nie masz konta?',
+      register: 'Zarejestruj się',
+      errors: {
+        usernameRequired: 'Nazwa użytkownika jest wymagana',
+        passwordRequired: 'Hasło jest wymagane',
+        fillAllFields: 'Wypełnij wszystkie pola',
+      },
     },
     common: {
       reset: 'Wyczyść filtry',
+      showFilters: 'Pokaż filtry',
       retry: 'Spróbuj ponownie',
       previous: 'Poprzednia',
       next: 'Następna',
@@ -86,6 +94,12 @@ const messages = {
       tryAdjustingFilters:
         'Spróbuj dostosować filtry lub wyczyścić je za pomocą przycisku po lewej.',
       clearFilters: 'Wyczyść filtry',
+    },
+    pages: {
+      authenticatedBricksets: {
+        title: 'Moje zestawy',
+        subtitle: 'Zarządzaj swoją kolekcją',
+      },
     },
   },
 };

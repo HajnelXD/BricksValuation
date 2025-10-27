@@ -512,6 +512,6 @@ yarn-error.log
 coverage_html/
 
 ### Cypress ###
-cypress/screenshots/
+cypress/screenshots/*
 
 # End of https://www.toptal.com/developers/gitignore/api/venv,python,pycharm,webstorm,visualstudiocode,django,git
