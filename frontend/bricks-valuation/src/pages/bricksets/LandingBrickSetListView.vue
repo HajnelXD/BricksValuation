@@ -156,10 +156,21 @@ onMounted(() => {
       <div class="flex flex-col gap-6">
         <!-- Header -->
         <div class="flex flex-col gap-2">
-          <h1 class="text-3xl font-bold text-gray-900">
-            {{ $t('bricksets.title') }}
-          </h1>
-          <p class="text-gray-600">{{ count }} {{ $t('bricksets.subtitle') }}</p>
+          <div class="flex items-center flex-col gap-4">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white w-fit">
+              {{ $t('bricksets.title') }}
+            </h1>
+            <button
+              v-if="authStore.isAuthenticated"
+              class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-md hover:shadow-lg flex items-center justify-center"
+              :aria-label="$t('bricksets.create.addNew')"
+              title="Dodaj nowy zestaw"
+              @click="() => router.push({ name: 'brickset-create' })"
+            >
+              +
+            </button>
+          </div>
+          <p class="text-gray-600 dark:text-gray-400">{{ count }} {{ $t('bricksets.subtitle') }}</p>
         </div>
 
         <!-- Filters and List Layout -->

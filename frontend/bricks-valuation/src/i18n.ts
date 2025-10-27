@@ -40,11 +40,14 @@ const messages = {
       retry: 'Spróbuj ponownie',
       previous: 'Poprzednia',
       next: 'Następna',
+      cancel: 'Anuluj',
+      keyboardShortcuts: 'Ctrl+Enter: wyślij • Esc: anuluj',
     },
     errors: {
       serverError: 'Wystąpił błąd serwera. Spróbuj ponownie później',
       networkError: 'Brak połączenia z serwerem. Sprawdź połączenie internetowe',
       timeout: 'Żądanie przekroczyło limit czasu. Spróbuj ponownie',
+      unauthorized: 'Sesja wygasła. Zaloguj się ponownie',
     },
     register: {
       title: 'Rejestracja',
@@ -99,6 +102,62 @@ const messages = {
       tryAdjustingFilters:
         'Spróbuj dostosować filtry lub wyczyścić je za pomocą przycisku po lewej.',
       clearFilters: 'Wyczyść filtry',
+      create: {
+        title: 'Dodaj nowy zestaw',
+        submit: 'Dodaj zestaw',
+        addNew: 'Dodaj nowy zestaw LEGO',
+        success: 'Zestaw nr {number} został pomyślnie dodany!',
+        formHint:
+          'Wszystkie pola oprócz wyceny są wymagane. Możesz dodać dodatkowe szczegóły i wycenę w szczegółach zestawu.',
+        section: {
+          identity: 'Tożsamość zestawu',
+          status: 'Status i kompletność',
+          attributes: 'Atrybuty zestawu',
+          estimate: 'Wycena właściciela (opcjonalnie)',
+        },
+        fields: {
+          number: {
+            label: 'Numer zestawu LEGO',
+            placeholder: 'np. 10331',
+          },
+          productionStatus: {
+            label: 'Status produkcji',
+          },
+          completeness: {
+            label: 'Kompletność',
+          },
+          hasInstructions: {
+            label: 'Instrukcje montażu',
+            description: 'Czy zestaw posiada oryginalne instrukcje?',
+          },
+          hasBox: {
+            label: 'Oryginalne pudełko',
+            description: 'Czy zestaw posiada oryginalne pudełko?',
+          },
+          isFactorySealed: {
+            label: 'Zapieczętowany z fabryki',
+            description: 'Czy zestaw jest w stanie nieotwarty (zapieczętowany)?',
+          },
+          ownerInitialEstimate: {
+            label: 'Wycena właściciela (PLN)',
+            placeholder: 'np. 500',
+            hint: 'Opcjonalnie podaj szacunkową wartość tego zestawu w złotych polskich.',
+          },
+        },
+        errors: {
+          numberRequired: 'Numer zestawu jest wymagany',
+          numberFormat: 'Numer zestawu musi być liczbą',
+          numberRange: 'Numer zestawu musi być między 0 a 9999999',
+          productionStatusRequired: 'Status produkcji jest wymagany',
+          productionStatusInvalid: 'Wybrany status produkcji jest nieprawidłowy',
+          completenessRequired: 'Kompletność jest wymagana',
+          completenessInvalid: 'Wybrana kompletność jest nieprawidłowa',
+          estimateFormat: 'Wycena musi być liczbą',
+          estimateRange: 'Wycena musi być między 1 a 999999 PLN',
+          duplicate: 'Ten zestaw już istnieje w systemie',
+          duplicateExists: 'Zestaw o tych parametrach już istnieje w Twojej kolekcji',
+        },
+      },
     },
     pages: {
       authenticatedBricksets: {
