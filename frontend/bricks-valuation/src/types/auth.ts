@@ -6,6 +6,32 @@
 // DTO - Data Transfer Objects from API
 
 /**
+ * User DTO - returned after login or profile fetch
+ */
+export interface UserDTO {
+  id: number;
+  username: string;
+  email: string;
+  created_at?: string; // ISO 8601 datetime
+}
+
+/**
+ * Request payload for user login
+ */
+export interface LoginRequestDTO {
+  username: string; // accepts username or email
+  password: string;
+}
+
+/**
+ * Response payload for successful login (200 OK)
+ */
+export interface LoginResponseDTO {
+  user: UserDTO;
+  token?: string; // optional in body (mainly HttpOnly cookie)
+}
+
+/**
  * Request payload for user registration
  */
 export interface RegisterRequestDTO {
@@ -32,6 +58,23 @@ export interface ValidationErrorDTO {
     [field: string]: string[];
   };
   code: 'VALIDATION_ERROR';
+  message?: string;
+}
+
+/**
+ * Response payload for invalid credentials error (401 Unauthorized)
+ */
+export interface InvalidCredentialsErrorDTO {
+  error_code: 'INVALID_CREDENTIALS';
+  message: string; // "Nieprawidłowe dane logowania"
+}
+
+/**
+ * Response payload for not authenticated error (401 Unauthorized)
+ */
+export interface NotAuthenticatedErrorDTO {
+  error_code: 'NOT_AUTHENTICATED';
+  message: string;
 }
 
 /**
@@ -43,6 +86,14 @@ export interface ConflictErrorDTO {
 }
 
 // ViewModel - Internal representation for UI layer
+
+/**
+ * Form data state for login form
+ */
+export interface LoginFormData {
+  username: string;
+  password: string;
+}
 
 /**
  * Form data state for registration form

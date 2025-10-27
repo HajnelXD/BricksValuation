@@ -10,7 +10,7 @@ export const env = {
    */
   api: {
     baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000/api',
-    version: import.meta.env.VITE_API_VERSION || 'v1',
+    version: import.meta.env.VITE_API_VERSION || '1',
     timeout: parseInt(import.meta.env.VITE_API_TIMEOUT || '30000', 10),
   },
 

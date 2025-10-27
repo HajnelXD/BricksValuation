@@ -11,7 +11,7 @@
  * - Accessibility features
  */
 
-import { computed, watchEffect, onMounted } from 'vue';
+import { computed, watchEffect, onMounted, watch } from 'vue';
 import { useRouter, useRoute } from 'vue-router';
 import type { BrickSetFiltersState, ProductionStatus, Completeness } from '@/types/bricksets';
 import { validateOrderingOption, parseBooleanQueryParam } from '@/mappers/bricksets';
@@ -22,9 +22,11 @@ import LoadingSkeletons from '@/components/bricksets/LoadingSkeletons.vue';
 import Pagination from '@/components/bricksets/Pagination.vue';
 import EmptyState from '@/components/bricksets/EmptyState.vue';
 import ErrorState from '@/components/bricksets/ErrorState.vue';
+import { useAuthStore } from '@/stores/auth';
 
 const router = useRouter();
 const route = useRoute();
+const authStore = useAuthStore();
 
 const PRODUCTION_STATUS_VALUES: readonly ProductionStatus[] = ['ACTIVE', 'RETIRED'];
 const COMPLETENESS_VALUES: readonly Completeness[] = ['COMPLETE', 'INCOMPLETE'];
@@ -81,7 +83,7 @@ const hasError = computed(() => error.value !== null && error.value !== '');
  * Uses router.replace to avoid history spam
  */
 watchEffect(() => {
-  const newQuery = buildQueryParams(filters);
+  const newQuery = buildQueryParams(filters.value);
   const queryString = JSON.stringify(newQuery);
   const currentString = JSON.stringify(route.query);
 
@@ -89,6 +91,15 @@ watchEffect(() => {
     router.replace({ query: newQuery });
   }
 });
+
+watch(
+  () => authStore.isAuthenticated,
+  (isAuthenticated: boolean, wasAuthenticated: boolean | void) => {
+    if (!isAuthenticated && wasAuthenticated) {
+      fetch();
+    }
+  }
+);
 
 /**
  * Event handlers
@@ -124,7 +135,7 @@ onMounted(() => {
 <template>
   <main class="min-h-screen bg-gray-50">
     <!-- Auth Prompt Banner -->
-    <div class="bg-blue-50 border-b border-blue-200 py-3 px-4">
+    <div v-if="!authStore.isAuthenticated" class="bg-blue-50 border-b border-blue-200 py-3 px-4">
       <div class="max-w-7xl mx-auto text-sm text-blue-900">
         💡 {{ $t('bricksets.authPrompt') }}
         <router-link to="/login" class="font-semibold underline hover:no-underline">
