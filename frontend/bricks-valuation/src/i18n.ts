@@ -12,6 +12,11 @@ const messages = {
       sets: 'Zestawy',
       mySets: 'Moje zestawy',
       myValuations: 'Moje wyceny',
+      publicSets: 'Wszystkie zestawy',
+      appSets: 'Moje zestawy',
+      userMenu: 'Moje konto',
+      profile: 'Profil',
+      logout: 'Wyloguj',
     },
     auth: {
       noAccountPrompt: 'Jeśli nie masz konta, kliknij',
