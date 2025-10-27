@@ -37,6 +37,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/bricksets/AuthenticatedBrickSetListView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/app/bricksets/new',
+    name: 'brickset-create',
+    component: () => import('../pages/bricksets/BrickSetCreateView.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({

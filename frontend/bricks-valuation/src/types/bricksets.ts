@@ -121,3 +121,128 @@ export interface UseBrickSetListSearchResult {
   resetFilters: () => void;
   fetch: () => Promise<void>;
 }
+
+/**
+ * BrickSet Create/Edit Form Types
+ */
+
+/**
+ * Form data ViewModel - String representation for input binding
+ */
+export interface BrickSetFormData {
+  number: string; // String for input binding, converted to number on submit
+  productionStatus: ProductionStatus;
+  completeness: Completeness;
+  hasInstructions: boolean;
+  hasBox: boolean;
+  isFactorySealed: boolean;
+  ownerInitialEstimate: string | null; // String for input binding, null when empty
+  isDirty: boolean; // Tracks if form has been modified
+}
+
+/**
+ * Field-level validation errors
+ */
+export interface FieldErrors {
+  number?: string;
+  productionStatus?: string;
+  completeness?: string;
+  hasInstructions?: string;
+  hasBox?: string;
+  isFactorySealed?: string;
+  ownerInitialEstimate?: string;
+  general?: string[];
+}
+
+/**
+ * DTO - Request payload for API
+ */
+export interface CreateBrickSetRequest {
+  number: number;
+  production_status: ProductionStatus;
+  completeness: Completeness;
+  has_instructions: boolean;
+  has_box: boolean;
+  is_factory_sealed: boolean;
+  owner_initial_estimate?: number | null;
+}
+
+/**
+ * DTO - Response from API after successful creation
+ */
+export interface CreateBrickSetResponse {
+  id: number;
+  number: number;
+  production_status: ProductionStatus;
+  completeness: Completeness;
+  has_instructions: boolean;
+  has_box: boolean;
+  is_factory_sealed: boolean;
+  owner_initial_estimate: number | null;
+  owner_id: number;
+  valuations_count: number;
+  total_likes: number;
+  top_valuation: {
+    id: number;
+    value: number;
+    user_id: number;
+    likes_count: number;
+    created_at: string;
+  } | null;
+  created_at: string; // ISO 8601 timestamp
+  updated_at: string; // ISO 8601 timestamp
+}
+
+/**
+ * DTO - Validation error response from API (400 Bad Request)
+ */
+export interface BrickSetValidationError {
+  errors: {
+    [fieldName: string]: string[];
+  };
+}
+
+/**
+ * DTO - Duplicate error response from API (409 Conflict)
+ */
+export interface BrickSetDuplicateError {
+  detail: string;
+  constraint: string;
+}
+
+/**
+ * ViewModel - Info about duplicate set for modal display
+ */
+export interface DuplicateSetInfo {
+  setId: number;
+  setNumber: number;
+  productionStatus: ProductionStatus;
+  completeness: Completeness;
+  hasInstructions: boolean;
+  hasBox: boolean;
+  isFactorySealed: boolean;
+  ownerName: string;
+}
+
+/**
+ * Select option for dropdowns
+ */
+export interface SelectOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+
+/**
+ * Default form data for initialization
+ */
+export const DEFAULT_BRICKSET_FORM_DATA: BrickSetFormData = {
+  number: '',
+  productionStatus: 'ACTIVE',
+  completeness: 'COMPLETE',
+  hasInstructions: false,
+  hasBox: false,
+  isFactorySealed: false,
+  ownerInitialEstimate: null,
+  isDirty: false,
+};
