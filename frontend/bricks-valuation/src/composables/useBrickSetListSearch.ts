@@ -3,7 +3,7 @@
  * Manages BrickSet list state, filtering, fetching, and debounced search
  */
 
-import { ref, watch, computed, reactive } from 'vue';
+import { ref, watch, computed, reactive, readonly } from 'vue';
 import apiClient from '@/config/axios';
 import { env } from '@/config/env';
 import type {
@@ -12,10 +12,18 @@ import type {
   UseBrickSetListSearchResult,
 } from '@/types/bricksets';
 import { DEFAULT_FILTERS_STATE } from '@/types/bricksets';
-import {
-  mapBrickSetDtoToListItemViewModel,
-  validateOrderingOption,
-} from '@/mappers/bricksets';
+import { mapBrickSetDtoToListItemViewModel, validateOrderingOption } from '@/mappers/bricksets';
+
+interface AxiosErrorLike {
+  response?: {
+    status?: number;
+    data?: unknown;
+  };
+}
+
+function isAxiosErrorLike(error: unknown): error is AxiosErrorLike {
+  return typeof error === 'object' && error !== null && 'response' in error;
+}
 
 interface UseBrickSetListSearchOptions {
   initialFilters?: Partial<BrickSetFiltersState>;
@@ -88,7 +96,9 @@ export function buildQueryParams(filters: BrickSetFiltersState): Record<string, 
  * Composable hook for managing brickset list search, filtering and pagination
  * Handles API integration, state management, and debounced search
  */
-export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}): UseBrickSetListSearchResult {
+export function useBrickSetListSearch(
+  options: UseBrickSetListSearchOptions = {}
+): UseBrickSetListSearchResult {
   // State
   const items = ref<BrickSetListItemViewModel[]>([]);
   const count = ref(0);
@@ -116,53 +126,47 @@ export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}
     abortController.value = new AbortController();
     loading.value = true;
     error.value = null;
-    console.log('[BrickSetListSearch] Fetching with filters:', filters);
 
     try {
       const queryParams = buildQueryParams(filters);
       const endpoint = `/${env.api.version}/bricksets`;
-      console.log('[BrickSetListSearch] Request:', { endpoint, queryParams });
-      
+
       const response = await apiClient.get(endpoint, {
         params: queryParams,
         signal: abortController.value.signal,
       });
 
-      console.log('[BrickSetListSearch] Success:', response.status, response.data);
       if (response.status === 200) {
         items.value = response.data.results.map(mapBrickSetDtoToListItemViewModel);
         count.value = response.data.count;
         error.value = null;
       }
-    } catch (err: any) {
-      console.error('[BrickSetListSearch] Error:', err);
-      
-      // Don't set error for aborted requests (user navigated away)
-      if (err.name === 'AbortError') {
-        console.log('[BrickSetListSearch] Request aborted');
+    } catch (err: unknown) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
         return;
       }
 
-      // Handle axios errors
-      const errorStatus = err.response?.status;
-      console.error('[BrickSetListSearch] Error status:', errorStatus, err.response?.data);
-      
-      if (errorStatus === 400) {
-          // Validation error - attempt recovery by resetting ordering
-        const hasOrderingError = err.response?.data?.code === 'VALIDATION_ERROR';
-        if (hasOrderingError && filters.ordering !== '-created_at') {
-          filters.ordering = '-created_at';
-          // Retry with corrected ordering
-          await fetch();
-          return;
+      if (isAxiosErrorLike(err)) {
+        const errorStatus = err.response?.status;
+
+        if (errorStatus === 400) {
+          const errorData = err.response?.data as { code?: string } | undefined;
+          const hasOrderingError = errorData?.code === 'VALIDATION_ERROR';
+          if (hasOrderingError && filters.ordering !== '-created_at') {
+            filters.ordering = '-created_at';
+            await fetch();
+            return;
+          }
+          error.value = 'Nieprawidłowe parametry filtrów – przywrócono domyślne sortowanie';
+        } else if (errorStatus === 401) {
+          error.value = 'Sesja wygasła – zaloguj się ponownie';
+        } else if (errorStatus === 500) {
+          error.value = 'Błąd serwera – spróbuj później';
+        } else if (errorStatus) {
+          error.value = 'Błąd podczas ładowania zestawów';
+        } else {
+          error.value = 'Błąd połączenia – sprawdź swoją sieć';
         }
-        error.value = 'Nieprawidłowe parametry filtrów – przywrócono domyślne sortowanie';
-      } else if (errorStatus === 401) {
-        error.value = 'Sesja wygasła – zaloguj się ponownie';
-      } else if (errorStatus === 500) {
-        error.value = 'Błąd serwera – spróbuj później';
-      } else if (errorStatus) {
-        error.value = 'Błąd podczas ładowania zestawów';
       } else {
         error.value = 'Błąd połączenia – sprawdź swoją sieć';
       }
@@ -171,7 +175,6 @@ export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}
       count.value = 0;
     } finally {
       loading.value = false;
-      console.log('[BrickSetListSearch] Loading state:', loading.value);
     }
   }
 
@@ -194,7 +197,7 @@ export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}
       // Reset to page 1 when filters change (non-search filters)
       filters.page = 1;
       fetch();
-    },
+    }
   );
 
   watch(
@@ -203,14 +206,14 @@ export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}
       // Debounce search
       filters.page = 1;
       debouncedFetch.run();
-    },
+    }
   );
 
   watch(
     () => filters.page,
     () => {
       fetch();
-    },
+    }
   );
 
   // Methods
@@ -234,10 +237,10 @@ export function useBrickSetListSearch(options: UseBrickSetListSearchOptions = {}
   }
 
   return {
-    items: computed(() => items.value),
-    count: computed(() => count.value),
-    loading: computed(() => loading.value),
-    error: computed(() => error.value),
+    items: readonly(items),
+    count: readonly(count),
+    loading: readonly(loading),
+    error: readonly(error),
     filters: computed(() => ({ ...filters })),
     setFilters,
     resetFilters,

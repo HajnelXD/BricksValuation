@@ -38,14 +38,18 @@ function handlePageChange(newPage: number) {
 </script>
 
 <template>
-  <div data-testid="pagination" class="flex justify-center items-center gap-2 mt-8" v-if="totalPages > 1">
+  <div
+    v-if="totalPages > 1"
+    data-testid="pagination"
+    class="flex justify-center items-center gap-2 mt-8"
+  >
     <!-- Previous Button -->
     <button
-      @click="handlePageChange(page - 1)"
       :disabled="page === 1 || loading"
       data-testid="prev-page-btn"
       class="px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50 transition-colors"
       :aria-label="`Poprzednia strona`"
+      @click="handlePageChange(page - 1)"
     >
       ← {{ $t('common.previous') }}
     </button>
@@ -55,7 +59,6 @@ function handlePageChange(newPage: number) {
       <button
         v-for="pageNum in pageNumbers"
         :key="pageNum"
-        @click="handlePageChange(pageNum)"
         :disabled="loading"
         :aria-current="page === pageNum ? 'page' : undefined"
         :aria-label="`Strona ${pageNum}`"
@@ -66,6 +69,7 @@ function handlePageChange(newPage: number) {
             : 'border-gray-300 hover:bg-gray-100',
           'disabled:opacity-50',
         ]"
+        @click="handlePageChange(pageNum)"
       >
         {{ pageNum }}
       </button>
@@ -73,11 +77,11 @@ function handlePageChange(newPage: number) {
 
     <!-- Next Button -->
     <button
-      @click="handlePageChange(page + 1)"
       :disabled="page >= totalPages || loading"
       data-testid="next-page-btn"
       class="px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50 transition-colors"
       :aria-label="`Następna strona`"
+      @click="handlePageChange(page + 1)"
     >
       {{ $t('common.next') }} →
     </button>

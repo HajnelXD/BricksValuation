@@ -39,16 +39,4 @@ export const env = {
   },
 };
 
-/**
- * Log configuration on app startup
- */
-if (env.app.isDev) {
-  console.log('[ENV CONFIG]', {
-    api: env.api,
-    app: env.app,
-    features: env.features,
-    logging: env.logging,
-  });
-}
-
 export default env;

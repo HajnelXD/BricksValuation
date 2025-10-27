@@ -1,8 +1,12 @@
-// @ts-ignore
+// @ts-expect-error Vitest runtime provides this module resolution during tests
 import { config } from '@vue/test-utils';
 
+type TranslationNode = {
+  [key: string]: string | TranslationNode;
+};
+
 // Mock translations dictionary
-const translations: Record<string, Record<string, Record<string, string>>> = {
+const translations: Record<string, TranslationNode> = {
   pl: {
     common: {
       reset: 'Wyczyść filtry',
@@ -43,10 +47,15 @@ const translations: Record<string, Record<string, Record<string, string>>> = {
 // Create a mock $t function that resolves translation keys
 const mockT = (key: string): string => {
   const parts = key.split('.');
-  let value: any = translations.pl;
+  let value: string | TranslationNode | undefined = translations.pl;
 
   for (const part of parts) {
-    value = value?.[part];
+    if (typeof value === 'object' && value !== null && part in value) {
+      value = (value as TranslationNode)[part];
+    } else {
+      value = undefined;
+      break;
+    }
   }
 
   return typeof value === 'string' ? value : key;
@@ -60,6 +69,3 @@ config.global.mocks = {
 config.global.provide = {
   ...config.global.provide,
 };
-
-
-

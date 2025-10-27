@@ -1,5 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { mount } from '@vue/test-utils';
+// @ts-expect-error Vitest runtime provides this module resolution during tests
+import type { DOMWrapper } from '@vue/test-utils';
 import BrickSetFiltersPanel from '@/components/bricksets/BrickSetFiltersPanel.vue';
 import type { BrickSetFiltersState } from '@/types/bricksets';
 
@@ -148,9 +150,11 @@ describe('BrickSetFiltersPanel Component', () => {
     });
 
     const inputs = wrapper.findAll('input');
-    inputs.forEach((input: any) => {
+    inputs.forEach((input: DOMWrapper<Element>) => {
       const disabled = input.attributes('disabled');
-      expect(disabled === '' || disabled === 'disabled' || disabled === true || disabled === undefined).toBe(true);
+      expect(
+        disabled === '' || disabled === 'disabled' || disabled === true || disabled === undefined
+      ).toBe(true);
     });
   });
 
@@ -174,7 +178,10 @@ describe('BrickSetFiltersPanel Component', () => {
 
     const buttons = wrapper.findAll('button');
     for (const button of buttons) {
-      if (button.text().toLowerCase().includes('czyść') || button.text().toLowerCase().includes('reset')) {
+      if (
+        button.text().toLowerCase().includes('czyść') ||
+        button.text().toLowerCase().includes('reset')
+      ) {
         await button.trigger('click');
         break;
       }

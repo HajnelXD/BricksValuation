@@ -72,7 +72,7 @@ export function formatRelativeTime(isoDateString: string): string {
  * Map top valuation from DTO to ViewModel
  */
 export function mapTopValuationToViewModel(
-  topValuation: BrickSetListItemDTO['top_valuation'],
+  topValuation: BrickSetListItemDTO['top_valuation']
 ): TopValuationViewModel | undefined {
   if (!topValuation) {
     return undefined;
@@ -108,7 +108,9 @@ export function mapBrickSetDtoToViewModel(dto: BrickSetListItemDTO): BrickSetCar
 /**
  * Map BrickSet DTO to ListItemViewModel (extends CardViewModel with createdAt)
  */
-export function mapBrickSetDtoToListItemViewModel(dto: BrickSetListItemDTO): BrickSetListItemViewModel {
+export function mapBrickSetDtoToListItemViewModel(
+  dto: BrickSetListItemDTO
+): BrickSetListItemViewModel {
   return {
     ...mapBrickSetDtoToViewModel(dto),
     createdAt: dto.created_at,
@@ -119,8 +121,8 @@ export function mapBrickSetDtoToListItemViewModel(dto: BrickSetListItemDTO): Bri
  * Validate ordering option against whitelist
  * Returns valid option or default
  */
-export function validateOrderingOption(ordering: any): OrderingOption {
-  if (VALID_ORDERING_OPTIONS.includes(ordering)) {
+export function validateOrderingOption(ordering: unknown): OrderingOption {
+  if (typeof ordering === 'string' && VALID_ORDERING_OPTIONS.includes(ordering as OrderingOption)) {
     return ordering as OrderingOption;
   }
   return '-created_at';

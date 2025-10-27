@@ -36,4 +36,3 @@ describe('EmptyState Component', () => {
     expect(wrapper.exists()).toBe(true);
   });
 });
-

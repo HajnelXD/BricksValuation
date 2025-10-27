@@ -223,7 +223,7 @@ describe('useBrickSetListSearch Composable', () => {
               data: { results: [], count: 0 },
             });
           }, 50);
-        }),
+        })
     );
 
     const composable = useBrickSetListSearch();

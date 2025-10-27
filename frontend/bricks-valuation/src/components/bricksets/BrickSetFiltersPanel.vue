@@ -5,7 +5,8 @@
  * Uses v-model pattern (modelValue + @update:modelValue)
  */
 
-import type { BrickSetFiltersState } from '@/types/bricksets';
+import type { BrickSetFiltersState, OrderingOption } from '@/types/bricksets';
+import { VALID_ORDERING_OPTIONS } from '@/types/bricksets';
 
 defineProps<{
   modelValue: BrickSetFiltersState;
@@ -29,21 +30,60 @@ function handleCompletenessChange(value: string) {
   emit('update:modelValue', { completeness: value || null });
 }
 
-function handleAttributeChange(attribute: 'has_instructions' | 'has_box' | 'is_factory_sealed', checked: boolean) {
+function handleAttributeChange(
+  attribute: 'has_instructions' | 'has_box' | 'is_factory_sealed',
+  checked: boolean
+) {
   emit('update:modelValue', { [attribute]: checked || null });
 }
 
 function handleOrderingChange(value: string) {
-  emit('update:modelValue', { ordering: value as any });
+  const ordering = isOrderingOption(value) ? value : '-created_at';
+  emit('update:modelValue', { ordering });
 }
 
 function handleReset() {
   emit('reset');
 }
+
+function isOrderingOption(value: string): value is OrderingOption {
+  return VALID_ORDERING_OPTIONS.includes(value as OrderingOption);
+}
+
+function onSearchInput(event: Event) {
+  handleSearchInput((event.target as HTMLInputElement).value);
+}
+
+function onProductionStatusChange(event: Event) {
+  handleProductionStatusChange((event.target as HTMLSelectElement).value);
+}
+
+function onCompletenessChange(event: Event) {
+  handleCompletenessChange((event.target as HTMLSelectElement).value);
+}
+
+function onHasInstructionsChange(event: Event) {
+  handleAttributeChange('has_instructions', (event.target as HTMLInputElement).checked);
+}
+
+function onHasBoxChange(event: Event) {
+  handleAttributeChange('has_box', (event.target as HTMLInputElement).checked);
+}
+
+function onIsFactorySealedChange(event: Event) {
+  handleAttributeChange('is_factory_sealed', (event.target as HTMLInputElement).checked);
+}
+
+function onOrderingChange(event: Event) {
+  handleOrderingChange((event.target as HTMLSelectElement).value);
+}
 </script>
 
 <template>
-  <div data-testid="filters-panel" class="sticky top-4 bg-white rounded-lg border border-gray-200 p-4 space-y-4">
+  <div
+    data-testid="filters-panel"
+    class="sticky top-4 bg-white rounded-lg border border-gray-200 p-4 space-y-4"
+  >
     <!-- Search Input -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -53,10 +93,10 @@ function handleReset() {
         type="search"
         :value="modelValue.q"
         :disabled="disabled"
-        @input="(e) => handleSearchInput((e.target as HTMLInputElement).value)"
         data-testid="search-input"
         placeholder="Numer zestawu..."
         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+        @input="onSearchInput"
       />
     </div>
 
@@ -68,9 +108,9 @@ function handleReset() {
       <select
         :value="modelValue.production_status || ''"
         :disabled="disabled"
-        @change="(e) => handleProductionStatusChange((e.target as HTMLSelectElement).value)"
         data-testid="production-status-filter"
         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+        @change="onProductionStatusChange"
       >
         <option value="">{{ $t('bricksets.allStatuses') }}</option>
         <option value="ACTIVE">{{ $t('bricksets.active') }}</option>
@@ -86,9 +126,9 @@ function handleReset() {
       <select
         :value="modelValue.completeness || ''"
         :disabled="disabled"
-        @change="(e) => handleCompletenessChange((e.target as HTMLSelectElement).value)"
         data-testid="completeness-filter"
         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+        @change="onCompletenessChange"
       >
         <option value="">{{ $t('bricksets.allCompletion') }}</option>
         <option value="COMPLETE">{{ $t('bricksets.complete') }}</option>
@@ -107,9 +147,9 @@ function handleReset() {
             type="checkbox"
             :checked="modelValue.has_instructions === true"
             :disabled="disabled"
-            @change="(e) => handleAttributeChange('has_instructions', (e.target as HTMLInputElement).checked)"
             data-testid="has-instructions-checkbox"
             class="rounded disabled:opacity-50"
+            @change="onHasInstructionsChange"
           />
           <span class="ml-2">{{ $t('bricksets.hasInstructions') }}</span>
         </label>
@@ -118,9 +158,9 @@ function handleReset() {
             type="checkbox"
             :checked="modelValue.has_box === true"
             :disabled="disabled"
-            @change="(e) => handleAttributeChange('has_box', (e.target as HTMLInputElement).checked)"
             data-testid="has-box-checkbox"
             class="rounded disabled:opacity-50"
+            @change="onHasBoxChange"
           />
           <span class="ml-2">{{ $t('bricksets.hasBox') }}</span>
         </label>
@@ -129,8 +169,8 @@ function handleReset() {
             type="checkbox"
             :checked="modelValue.is_factory_sealed === true"
             :disabled="disabled"
-            @change="(e) => handleAttributeChange('is_factory_sealed', (e.target as HTMLInputElement).checked)"
             class="rounded disabled:opacity-50"
+            @change="onIsFactorySealedChange"
           />
           <span class="ml-2">{{ $t('bricksets.sealed') }}</span>
         </label>
@@ -145,9 +185,9 @@ function handleReset() {
       <select
         :value="modelValue.ordering"
         :disabled="disabled"
-        @change="(e) => handleOrderingChange((e.target as HTMLSelectElement).value)"
         data-testid="ordering-select"
         class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
+        @change="onOrderingChange"
       >
         <option value="-created_at">{{ $t('bricksets.newest') }}</option>
         <option value="created_at">{{ $t('bricksets.oldest') }}</option>
@@ -158,10 +198,10 @@ function handleReset() {
 
     <!-- Reset Button -->
     <button
-      @click="handleReset"
       :disabled="disabled"
       data-testid="reset-filters-btn"
       class="w-full px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
+      @click="handleReset"
     >
       {{ $t('common.reset') }}
     </button>
