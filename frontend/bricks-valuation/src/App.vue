@@ -4,9 +4,9 @@ import NotificationToaster from '@/components/base/NotificationToaster.vue';
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 text-gray-900">
+  <div class="flex flex-col min-h-screen bg-gray-50 text-gray-900">
     <MainNavigation />
-    <main>
+    <main class="flex-1 pt-20">
       <RouterView />
     </main>
     <NotificationToaster />
@@ -15,6 +15,6 @@ import NotificationToaster from '@/components/base/NotificationToaster.vue';
 
 <style scoped>
 main {
-  min-height: calc(100vh - 4rem);
+  min-height: calc(100vh - 5rem);
 }
 </style>
