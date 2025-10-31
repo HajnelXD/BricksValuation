@@ -11,6 +11,11 @@ import type {
   ProductionStatus,
   Completeness,
   OrderingOption,
+  BrickSetDetailDTO,
+  BrickSetDetailViewModel,
+  ValuationDTO,
+  ValuationViewModel,
+  TopValuationDetailViewModel,
 } from '@/types/bricksets';
 import { VALID_ORDERING_OPTIONS } from '@/types/bricksets';
 
@@ -144,4 +149,69 @@ export function parseBooleanQueryParam(value: string | null | undefined): boolea
  */
 export function serializeBooleanQueryParam(value: boolean | null): string | null {
   return value === true ? 'true' : null;
+}
+
+/**
+ * Map ValuationDTO to ValuationViewModel
+ */
+export function mapValuationDtoToViewModel(dto: ValuationDTO): ValuationViewModel {
+  return {
+    id: dto.id,
+    userId: dto.user_id,
+    valueFormatted: formatCurrency(dto.value),
+    comment: dto.comment,
+    likesCount: dto.likes_count,
+    createdAtRelative: formatRelativeTime(dto.created_at),
+    createdAt: dto.created_at,
+  };
+}
+
+/**
+ * Map ValuationDTO to TopValuationDetailViewModel
+ */
+export function mapValuationDtoToTopViewModel(dto: ValuationDTO): TopValuationDetailViewModel {
+  return {
+    id: dto.id,
+    userId: dto.user_id,
+    valueFormatted: formatCurrency(dto.value),
+    comment: dto.comment,
+    likesCount: dto.likes_count,
+    createdAtRelative: formatRelativeTime(dto.created_at),
+  };
+}
+
+/**
+ * Map BrickSetDetailDTO to BrickSetDetailViewModel
+ * Sortuje wyceny malejąco po likes_count, następnie rosnąco po created_at
+ */
+export function mapBrickSetDetailDtoToViewModel(dto: BrickSetDetailDTO): BrickSetDetailViewModel {
+  // Sortowanie wycen: malejąco po likes_count, następnie rosnąco po created_at
+  const sortedValuations = [...dto.valuations].sort((a, b) => {
+    if (b.likes_count !== a.likes_count) {
+      return b.likes_count - a.likes_count;
+    }
+    return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+  });
+
+  const topValuation = sortedValuations[0]
+    ? mapValuationDtoToTopViewModel(sortedValuations[0])
+    : null;
+
+  return {
+    id: dto.id,
+    number: String(dto.number).padStart(5, '0'),
+    productionStatusLabel: formatProductionStatusLabel(dto.production_status),
+    completenessLabel: formatCompletenessLabel(dto.completeness),
+    hasInstructions: dto.has_instructions,
+    hasBox: dto.has_box,
+    isFactorySealed: dto.is_factory_sealed,
+    ownerInitialEstimate: dto.owner_initial_estimate,
+    ownerId: dto.owner_id,
+    valuationsCount: dto.valuations_count,
+    totalLikes: dto.total_likes,
+    topValuation,
+    valuations: sortedValuations.map(mapValuationDtoToViewModel),
+    createdAtRelative: formatRelativeTime(dto.created_at),
+    createdAt: dto.created_at,
+  };
 }
