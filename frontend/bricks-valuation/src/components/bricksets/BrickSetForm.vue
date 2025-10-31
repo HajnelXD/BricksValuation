@@ -1,9 +1,10 @@
 <script setup lang="ts">
 /**
  * BrickSetForm Component
- * Main form component for creating a new BrickSet
+ * Main form component for creating and editing BrickSets
  *
  * Features:
+ * - Supports both create and edit modes
  * - Organized form sections (Identity, Status, Attributes, Estimate)
  * - Integration with useBrickSetForm composable
  * - Field validation with error display
@@ -13,25 +14,65 @@
  */
 
 import { useI18n } from 'vue-i18n';
+import { watch } from 'vue';
 import { useBrickSetForm } from '@/composables/useBrickSetForm';
-import type { SelectOption, CreateBrickSetResponse } from '@/types/bricksets';
+import type {
+  SelectOption,
+  CreateBrickSetResponse,
+  FormMode,
+  BrickSetFormData,
+} from '@/types/bricksets';
 import BaseInput from '@/components/auth/BaseInput.vue';
 import BaseCustomSelect from '@/components/base/BaseCustomSelect.vue';
 import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
 import ValidationErrorList from '@/components/base/ValidationErrorList.vue';
 
-defineProps<{
+interface Props {
   isLoading?: boolean;
-}>();
+  mode?: FormMode;
+  initialData?: BrickSetFormData;
+  readonlyFields?: string[];
+}
+
+const props = withDefaults(defineProps<Props>(), {
+  isLoading: false,
+  mode: 'create',
+  initialData: undefined,
+  readonlyFields: () => [],
+});
 
 const emit = defineEmits<{
   'on-submit': [response: CreateBrickSetResponse];
   'on-error': [error: unknown];
   'on-cancel': [];
+  'update:isDirty': [isDirty: boolean];
+  'update:formData': [formData: BrickSetFormData];
 }>();
 
 const { t } = useI18n();
 const form = useBrickSetForm();
+
+// Initialize form with initial data in edit mode
+if (props.mode === 'edit' && props.initialData) {
+  Object.assign(form.formData, props.initialData);
+}
+
+// Watch isDirty and emit changes to parent
+watch(
+  () => form.isDirty,
+  (newValue: boolean) => {
+    emit('update:isDirty', newValue);
+  }
+);
+
+// Watch formData and emit changes to parent
+watch(
+  () => form.formData,
+  (newValue: BrickSetFormData) => {
+    emit('update:formData', newValue);
+  },
+  { deep: true }
+);
 
 // Build select options from i18n
 const productionStatusOptions: SelectOption[] = [
@@ -43,6 +84,13 @@ const completenessOptions: SelectOption[] = [
   { value: 'COMPLETE', label: t('bricksets.complete') },
   { value: 'INCOMPLETE', label: t('bricksets.incomplete') },
 ];
+
+/**
+ * Check if a field is readonly
+ */
+function isFieldReadonly(fieldName: string): boolean {
+  return props.readonlyFields.includes(fieldName);
+}
 
 /**
  * Handle form submission
@@ -71,7 +119,7 @@ function handleCancel(): void {
  * Handle field value changes and validation
  */
 function handleFieldChange(
-  fieldName: keyof typeof form.formData,
+  fieldName: keyof BrickSetFormData,
   value: string | boolean | null
 ): void {
   form.setFieldValue(fieldName, value);
@@ -90,6 +138,14 @@ function handleKeyDown(event: KeyboardEvent): void {
     handleCancel();
   }
 }
+
+/**
+ * Expose form state to parent component
+ * Used for accessing formData in edit mode
+ */
+defineExpose({
+  form,
+});
 </script>
 
 <template>
@@ -127,8 +183,8 @@ function handleKeyDown(event: KeyboardEvent): void {
           :placeholder="t('bricksets.create.fields.number.placeholder')"
           :error="form.fieldErrors.number"
           type="number"
-          :disabled="form.isSubmitting.value"
-          @update:model-value="(val) => handleFieldChange('number', val)"
+          :disabled="form.isSubmitting.value || isFieldReadonly('number')"
+          @update:model-value="(val: string) => handleFieldChange('number', val)"
           @blur="() => form.validateField('number')"
         />
       </fieldset>
@@ -145,9 +201,9 @@ function handleKeyDown(event: KeyboardEvent): void {
             :label="t('bricksets.create.fields.productionStatus.label')"
             :options="productionStatusOptions"
             :error="form.fieldErrors.productionStatus"
-            :disabled="form.isSubmitting.value"
+            :disabled="form.isSubmitting.value || isFieldReadonly('productionStatus')"
             required
-            @update:model-value="(val) => handleFieldChange('productionStatus', val)"
+            @update:model-value="(val: string) => handleFieldChange('productionStatus', val)"
             @blur="() => form.validateField('productionStatus')"
           />
 
@@ -156,9 +212,9 @@ function handleKeyDown(event: KeyboardEvent): void {
             :label="t('bricksets.create.fields.completeness.label')"
             :options="completenessOptions"
             :error="form.fieldErrors.completeness"
-            :disabled="form.isSubmitting.value"
+            :disabled="form.isSubmitting.value || isFieldReadonly('completeness')"
             required
-            @update:model-value="(val) => handleFieldChange('completeness', val)"
+            @update:model-value="(val: string) => handleFieldChange('completeness', val)"
             @blur="() => form.validateField('completeness')"
           />
         </div>
@@ -175,24 +231,24 @@ function handleKeyDown(event: KeyboardEvent): void {
             :model-value="form.formData.hasInstructions"
             :label="t('bricksets.create.fields.hasInstructions.label')"
             :description="t('bricksets.create.fields.hasInstructions.description')"
-            :disabled="form.isSubmitting.value"
-            @update:model-value="(val) => handleFieldChange('hasInstructions', val)"
+            :disabled="form.isSubmitting.value || isFieldReadonly('hasInstructions')"
+            @update:model-value="(val: boolean) => handleFieldChange('hasInstructions', val)"
           />
 
           <BaseCheckbox
             :model-value="form.formData.hasBox"
             :label="t('bricksets.create.fields.hasBox.label')"
             :description="t('bricksets.create.fields.hasBox.description')"
-            :disabled="form.isSubmitting.value"
-            @update:model-value="(val) => handleFieldChange('hasBox', val)"
+            :disabled="form.isSubmitting.value || isFieldReadonly('hasBox')"
+            @update:model-value="(val: boolean) => handleFieldChange('hasBox', val)"
           />
 
           <BaseCheckbox
             :model-value="form.formData.isFactorySealed"
             :label="t('bricksets.create.fields.isFactorySealed.label')"
             :description="t('bricksets.create.fields.isFactorySealed.description')"
-            :disabled="form.isSubmitting.value"
-            @update:model-value="(val) => handleFieldChange('isFactorySealed', val)"
+            :disabled="form.isSubmitting.value || isFieldReadonly('isFactorySealed')"
+            @update:model-value="(val: boolean) => handleFieldChange('isFactorySealed', val)"
           />
         </div>
       </fieldset>
@@ -209,8 +265,10 @@ function handleKeyDown(event: KeyboardEvent): void {
           :placeholder="t('bricksets.create.fields.ownerInitialEstimate.placeholder')"
           :error="form.fieldErrors.ownerInitialEstimate"
           type="number"
-          :disabled="form.isSubmitting.value"
-          @update:model-value="(val) => handleFieldChange('ownerInitialEstimate', val || null)"
+          :disabled="form.isSubmitting.value || isFieldReadonly('ownerInitialEstimate')"
+          @update:model-value="
+            (val: string) => handleFieldChange('ownerInitialEstimate', val || null)
+          "
           @blur="() => form.validateField('ownerInitialEstimate')"
         />
         <p class="text-xs text-gray-400 mt-2">
@@ -226,8 +284,11 @@ function handleKeyDown(event: KeyboardEvent): void {
       </div>
     </div>
 
-    <!-- Bottom Form Actions -->
-    <div class="mt-8 flex flex-col-reverse sm:flex-row justify-between gap-4">
+    <!-- Bottom Form Actions (only in create mode) -->
+    <div
+      v-if="mode === 'create'"
+      class="mt-8 flex flex-col-reverse sm:flex-row justify-between gap-4"
+    >
       <button
         type="button"
         :disabled="form.isSubmitting.value"
@@ -266,8 +327,8 @@ function handleKeyDown(event: KeyboardEvent): void {
       </button>
     </div>
 
-    <!-- Keyboard Shortcuts Hint -->
-    <div class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
+    <!-- Keyboard Shortcuts Hint (only in create mode) -->
+    <div v-if="mode === 'create'" class="mt-6 text-center text-xs text-gray-500 dark:text-gray-400">
       <p>{{ t('common.keyboardShortcuts') }}</p>
     </div>
   </form>

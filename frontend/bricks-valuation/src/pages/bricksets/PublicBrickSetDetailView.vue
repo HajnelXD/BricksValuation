@@ -109,6 +109,15 @@ function handleGoBack() {
 }
 
 /**
+ * Handle edit navigation
+ */
+function handleEditBrickSet() {
+  if (brickSetId.value) {
+    router.push({ name: 'brickset-edit', params: { id: brickSetId.value } });
+  }
+}
+
+/**
  * Handle top valuation click - scroll to valuations section
  */
 function handleTopValuationClick() {
@@ -131,14 +140,24 @@ onMounted(() => {
 <template>
   <main class="min-h-screen bg-gray-900">
     <div class="max-w-4xl mx-auto px-4 py-8">
-      <!-- Back Button -->
-      <button
-        type="button"
-        class="mb-4 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
-        @click="handleGoBack"
-      >
-        ← {{ $t('bricksets.detail.back') }}
-      </button>
+      <!-- Back Button and Edit Button -->
+      <div class="mb-4 flex gap-2">
+        <button
+          type="button"
+          class="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500"
+          @click="handleGoBack"
+        >
+          ← {{ $t('bricksets.detail.back') }}
+        </button>
+        <button
+          v-if="authStore.isAuthenticated"
+          type="button"
+          class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+          @click="handleEditBrickSet"
+        >
+          ✎ {{ $t('bricksets.detail.edit') }}
+        </button>
+      </div>
 
       <!-- Loading State -->
       <LoadingSkeletons v-if="loading && !brickSet" :count="3" />
