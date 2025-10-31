@@ -41,6 +41,7 @@ const messages = {
       previous: 'Poprzednia',
       next: 'Następna',
       cancel: 'Anuluj',
+      close: 'Zamknij',
       keyboardShortcuts: 'Ctrl+Enter: wyślij • Esc: anuluj',
     },
     errors: {
@@ -90,7 +91,7 @@ const messages = {
       attributes: 'Atrybuty',
       hasInstructions: 'Ma instrukcje',
       hasBox: 'Ma pudełko',
-      sealed: 'Zapieczętowany',
+      sealed: 'Fabrycznie nowy',
       orderBy: 'Sortuj',
       newest: 'Najnowsze',
       oldest: 'Najstarsze',
@@ -135,8 +136,8 @@ const messages = {
             description: 'Czy zestaw posiada oryginalne pudełko?',
           },
           isFactorySealed: {
-            label: 'Zapieczętowany z fabryki',
-            description: 'Czy zestaw jest w stanie nieotwarty (zapieczętowany)?',
+            label: 'Fabrycznie nowy',
+            description: 'Czy zestaw jest w stanie nieotwarty (fabrycznie nowy)?',
           },
           ownerInitialEstimate: {
             label: 'Wycena właściciela (PLN)',
@@ -157,6 +158,15 @@ const messages = {
           duplicate: 'Ten zestaw już istnieje w systemie',
           duplicateExists: 'Zestaw o tych parametrach już istnieje w Twojej kolekcji',
         },
+      },
+      duplicate: {
+        title: 'Zestaw już istnieje',
+        message:
+          'Próba dodania zestawu z taką samą kombinacją cech (numer, status produkcji, kompletność, instrukcja, pudełko, zapieczętowanie) nie jest możliwa, ponieważ taki zestaw już istnieje w systemie.',
+        existingSet: 'Istniejący zestaw',
+        helpText:
+          'Możesz przejść do istniejącego zestawu, aby sprawdzić jego szczegóły i wyceny, lub zamknąć to okno i zmodyfikować dane formularza.',
+        viewExisting: 'Przejdź do istniejącego zestawu',
       },
     },
     pages: {

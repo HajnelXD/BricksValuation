@@ -8,12 +8,12 @@
 <template>
   <div
     data-testid="empty-state"
-    class="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center"
+    class="bg-gray-800 border-2 border-dashed border-gray-700 rounded-lg p-12 text-center"
   >
-    <p class="text-gray-600">
+    <p class="text-gray-300">
       {{ $t('bricksets.noResults') }}
     </p>
-    <p class="text-gray-500 text-sm mt-2">
+    <p class="text-gray-400 text-sm mt-2">
       {{ $t('bricksets.tryAdjustingFilters') }}
     </p>
   </div>

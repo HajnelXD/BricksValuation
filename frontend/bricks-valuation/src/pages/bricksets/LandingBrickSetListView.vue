@@ -133,18 +133,24 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="min-h-screen bg-gray-50">
+  <main class="min-h-screen bg-gray-900">
     <!-- Auth Prompt Banner -->
-    <div v-if="!authStore.isAuthenticated" class="bg-blue-50 border-b border-blue-200 py-3 px-4">
-      <div class="max-w-7xl mx-auto text-sm text-blue-900">
+    <div v-if="!authStore.isAuthenticated" class="bg-gray-800 border-b border-gray-700 py-3 px-4">
+      <div class="max-w-7xl mx-auto text-sm text-gray-300">
         💡 {{ $t('bricksets.authPrompt') }}
-        <router-link to="/login" class="font-semibold underline hover:no-underline">
+        <router-link
+          to="/login"
+          class="font-semibold text-blue-400 hover:text-blue-300 underline hover:no-underline"
+        >
           {{ $t('nav.login') }}
         </router-link>
         <br />
         <span class="inline-flex items-center gap-2">
           {{ $t('auth.noAccountPrompt') }}
-          <router-link to="/register" class="font-semibold underline hover:no-underline">
+          <router-link
+            to="/register"
+            class="font-semibold text-blue-400 hover:text-blue-300 underline hover:no-underline"
+          >
             {{ $t('nav.register') }}
           </router-link>
         </span>
@@ -157,12 +163,12 @@ onMounted(() => {
         <!-- Header -->
         <div class="flex flex-col gap-2">
           <div class="flex items-center flex-col gap-4">
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white w-fit">
+            <h1 class="text-3xl font-bold text-white w-fit">
               {{ $t('bricksets.title') }}
             </h1>
             <button
               v-if="authStore.isAuthenticated"
-              class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-md hover:shadow-lg flex items-center justify-center"
+              class="flex-shrink-0 w-10 h-10 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 focus:ring-blue-500 shadow-md hover:shadow-lg flex items-center justify-center"
               :aria-label="$t('bricksets.create.addNew')"
               title="Dodaj nowy zestaw"
               @click="() => router.push({ name: 'brickset-create' })"
@@ -170,7 +176,7 @@ onMounted(() => {
               +
             </button>
           </div>
-          <p class="text-gray-600 dark:text-gray-400">{{ count }} {{ $t('bricksets.subtitle') }}</p>
+          <p class="text-gray-400">{{ count }} {{ $t('bricksets.subtitle') }}</p>
         </div>
 
         <!-- Filters and List Layout -->

@@ -1,5 +1,6 @@
 // @ts-expect-error Vitest runtime provides this module resolution during tests
 import { config } from '@vue/test-utils';
+import { beforeEach, afterEach } from 'vitest';
 
 type TranslationNode = {
   [key: string]: string | TranslationNode;
@@ -30,7 +31,7 @@ const translations: Record<string, TranslationNode> = {
       attributes: 'Atrybuty',
       hasInstructions: 'Ma instrukcje',
       hasBox: 'Ma pudełko',
-      sealed: 'Zapieczętowany',
+      sealed: 'Fabrycznie nowy',
       orderBy: 'Sortuj',
       newest: 'Najnowsze',
       oldest: 'Najstarsze',
@@ -69,3 +70,19 @@ config.global.mocks = {
 config.global.provide = {
   ...config.global.provide,
 };
+
+// Setup DOM elements required by components (e.g., for Teleport)
+beforeEach(() => {
+  // Create #app div for Teleport components
+  const app = document.createElement('div');
+  app.id = 'app';
+  document.body.appendChild(app);
+});
+
+afterEach(() => {
+  // Clean up #app div
+  const app = document.getElementById('app');
+  if (app) {
+    document.body.removeChild(app);
+  }
+});

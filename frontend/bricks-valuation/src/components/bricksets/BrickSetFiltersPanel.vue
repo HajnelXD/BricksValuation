@@ -5,8 +5,12 @@
  * Uses v-model pattern (modelValue + @update:modelValue)
  */
 
-import type { BrickSetFiltersState, OrderingOption } from '@/types/bricksets';
+import { computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+import type { BrickSetFiltersState, OrderingOption, SelectOption } from '@/types/bricksets';
 import { VALID_ORDERING_OPTIONS } from '@/types/bricksets';
+import BaseInput from '@/components/auth/BaseInput.vue';
+import BaseCustomSelect from '@/components/base/BaseCustomSelect.vue';
 
 defineProps<{
   modelValue: BrickSetFiltersState;
@@ -17,6 +21,26 @@ const emit = defineEmits<{
   'update:modelValue': [filters: Partial<BrickSetFiltersState>];
   reset: [];
 }>();
+
+const { t } = useI18n();
+
+// Select options
+const productionStatusOptions = computed<SelectOption[]>(() => [
+  { value: '', label: t('bricksets.allStatuses') },
+  { value: 'ACTIVE', label: t('bricksets.active') },
+  { value: 'RETIRED', label: t('bricksets.retired') },
+]);
+
+const completenessOptions = computed<SelectOption[]>(() => [
+  { value: '', label: t('bricksets.allCompletion') },
+  { value: 'COMPLETE', label: t('bricksets.complete') },
+  { value: 'INCOMPLETE', label: t('bricksets.incomplete') },
+]);
+
+const orderingOptions = computed<SelectOption[]>(() => [
+  { value: '-created_at', label: t('bricksets.newest') },
+  { value: 'created_at', label: t('bricksets.oldest') },
+]);
 
 function handleSearchInput(value: string) {
   emit('update:modelValue', { q: value });
@@ -50,18 +74,6 @@ function isOrderingOption(value: string): value is OrderingOption {
   return VALID_ORDERING_OPTIONS.includes(value as OrderingOption);
 }
 
-function onSearchInput(event: Event) {
-  handleSearchInput((event.target as HTMLInputElement).value);
-}
-
-function onProductionStatusChange(event: Event) {
-  handleProductionStatusChange((event.target as HTMLSelectElement).value);
-}
-
-function onCompletenessChange(event: Event) {
-  handleCompletenessChange((event.target as HTMLSelectElement).value);
-}
-
 function onHasInstructionsChange(event: Event) {
   handleAttributeChange('has_instructions', (event.target as HTMLInputElement).checked);
 }
@@ -73,103 +85,82 @@ function onHasBoxChange(event: Event) {
 function onIsFactorySealedChange(event: Event) {
   handleAttributeChange('is_factory_sealed', (event.target as HTMLInputElement).checked);
 }
-
-function onOrderingChange(event: Event) {
-  handleOrderingChange((event.target as HTMLSelectElement).value);
-}
 </script>
 
 <template>
   <div
     data-testid="filters-panel"
-    class="sticky top-4 bg-white rounded-lg border border-gray-200 p-4 space-y-4"
+    class="sticky top-4 bg-gray-800 rounded-lg border border-gray-700 p-4 space-y-4"
   >
     <!-- Search Input -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ $t('bricksets.search') }}
-      </label>
-      <input
+    <div data-testid="search-input">
+      <BaseInput
+        :model-value="modelValue.q"
+        :label="$t('bricksets.search')"
         type="search"
-        :value="modelValue.q"
-        :disabled="disabled"
-        data-testid="search-input"
         placeholder="Numer zestawu..."
-        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-        @input="onSearchInput"
+        :disabled="disabled"
+        clearable
+        @update:model-value="handleSearchInput"
       />
     </div>
 
     <!-- Production Status Select -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ $t('bricksets.productionStatus') }}
-      </label>
-      <select
-        :value="modelValue.production_status || ''"
+    <div data-testid="production-status-filter">
+      <BaseCustomSelect
+        :model-value="modelValue.production_status || ''"
+        :label="$t('bricksets.productionStatus')"
+        :options="productionStatusOptions"
         :disabled="disabled"
-        data-testid="production-status-filter"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-        @change="onProductionStatusChange"
-      >
-        <option value="">{{ $t('bricksets.allStatuses') }}</option>
-        <option value="ACTIVE">{{ $t('bricksets.active') }}</option>
-        <option value="RETIRED">{{ $t('bricksets.retired') }}</option>
-      </select>
+        @update:model-value="handleProductionStatusChange"
+      />
     </div>
 
     <!-- Completeness Select -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ $t('bricksets.completeness') }}
-      </label>
-      <select
-        :value="modelValue.completeness || ''"
+    <div data-testid="completeness-filter">
+      <BaseCustomSelect
+        :model-value="modelValue.completeness || ''"
+        :label="$t('bricksets.completeness')"
+        :options="completenessOptions"
         :disabled="disabled"
-        data-testid="completeness-filter"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-        @change="onCompletenessChange"
-      >
-        <option value="">{{ $t('bricksets.allCompletion') }}</option>
-        <option value="COMPLETE">{{ $t('bricksets.complete') }}</option>
-        <option value="INCOMPLETE">{{ $t('bricksets.incomplete') }}</option>
-      </select>
+        @update:model-value="handleCompletenessChange"
+      />
     </div>
 
     <!-- Attribute Toggles -->
-    <fieldset class="border-t pt-4">
-      <legend class="text-sm font-medium text-gray-700 mb-2">
+    <fieldset class="border-t border-gray-700 pt-4">
+      <legend class="text-sm font-medium text-gray-300 mb-2">
         {{ $t('bricksets.attributes') }}
       </legend>
       <div class="space-y-2">
-        <label class="flex items-center text-sm">
+        <label class="flex items-center text-sm text-gray-300 cursor-pointer">
           <input
             type="checkbox"
             :checked="modelValue.has_instructions === true"
             :disabled="disabled"
             data-testid="has-instructions-checkbox"
-            class="rounded disabled:opacity-50"
+            class="rounded bg-gray-900 border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800 disabled:opacity-50"
             @change="onHasInstructionsChange"
           />
           <span class="ml-2">{{ $t('bricksets.hasInstructions') }}</span>
         </label>
-        <label class="flex items-center text-sm">
+        <label class="flex items-center text-sm text-gray-300 cursor-pointer">
           <input
             type="checkbox"
             :checked="modelValue.has_box === true"
             :disabled="disabled"
             data-testid="has-box-checkbox"
-            class="rounded disabled:opacity-50"
+            class="rounded bg-gray-900 border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800 disabled:opacity-50"
             @change="onHasBoxChange"
           />
           <span class="ml-2">{{ $t('bricksets.hasBox') }}</span>
         </label>
-        <label class="flex items-center text-sm">
+        <label class="flex items-center text-sm text-gray-300 cursor-pointer">
           <input
             type="checkbox"
             :checked="modelValue.is_factory_sealed === true"
             :disabled="disabled"
-            class="rounded disabled:opacity-50"
+            class="rounded bg-gray-900 border-gray-600 text-blue-600 focus:ring-blue-500 focus:ring-offset-gray-800 disabled:opacity-50"
             @change="onIsFactorySealedChange"
           />
           <span class="ml-2">{{ $t('bricksets.sealed') }}</span>
@@ -178,29 +169,21 @@ function onOrderingChange(event: Event) {
     </fieldset>
 
     <!-- Ordering Select -->
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-2">
-        {{ $t('bricksets.orderBy') }}
-      </label>
-      <select
-        :value="modelValue.ordering"
+    <div data-testid="ordering-select">
+      <BaseCustomSelect
+        :model-value="modelValue.ordering"
+        :label="$t('bricksets.orderBy')"
+        :options="orderingOptions"
         :disabled="disabled"
-        data-testid="ordering-select"
-        class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50"
-        @change="onOrderingChange"
-      >
-        <option value="-created_at">{{ $t('bricksets.newest') }}</option>
-        <option value="created_at">{{ $t('bricksets.oldest') }}</option>
-        <option value="-popular">{{ $t('bricksets.popular') }}</option>
-        <option value="-valuations">{{ $t('bricksets.mostValuations') }}</option>
-      </select>
+        @update:model-value="handleOrderingChange"
+      />
     </div>
 
     <!-- Reset Button -->
     <button
       :disabled="disabled"
       data-testid="reset-filters-btn"
-      class="w-full px-3 py-2 bg-gray-200 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-300 disabled:opacity-50 transition-colors"
+      class="w-full px-3 py-2 bg-gray-700 text-gray-200 rounded-md text-sm font-medium hover:bg-gray-600 disabled:opacity-50 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
       @click="handleReset"
     >
       {{ $t('common.reset') }}
@@ -210,7 +193,6 @@ function onOrderingChange(event: Event) {
 
 <style scoped>
 input:disabled,
-select:disabled,
 button:disabled {
   cursor: not-allowed;
 }

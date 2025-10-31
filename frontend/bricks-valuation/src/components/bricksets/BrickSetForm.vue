@@ -16,7 +16,7 @@ import { useI18n } from 'vue-i18n';
 import { useBrickSetForm } from '@/composables/useBrickSetForm';
 import type { SelectOption, CreateBrickSetResponse } from '@/types/bricksets';
 import BaseInput from '@/components/auth/BaseInput.vue';
-import BaseSelect from '@/components/base/BaseSelect.vue';
+import BaseCustomSelect from '@/components/base/BaseCustomSelect.vue';
 import BaseCheckbox from '@/components/base/BaseCheckbox.vue';
 import ValidationErrorList from '@/components/base/ValidationErrorList.vue';
 
@@ -100,7 +100,7 @@ function handleKeyDown(event: KeyboardEvent): void {
   >
     <!-- Form Header -->
     <div class="mb-8">
-      <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+      <h1 class="text-2xl sm:text-3xl font-bold text-white">
         {{ t('bricksets.create.title') }}
       </h1>
     </div>
@@ -117,7 +117,7 @@ function handleKeyDown(event: KeyboardEvent): void {
     <div class="mt-8 space-y-8">
       <!-- Section 1: BrickSet Identity -->
       <fieldset class="space-y-4">
-        <legend class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <legend class="text-lg font-semibold text-white mb-4">
           {{ t('bricksets.create.section.identity') }}
         </legend>
 
@@ -135,12 +135,12 @@ function handleKeyDown(event: KeyboardEvent): void {
 
       <!-- Section 2: Production Status and Completeness -->
       <fieldset class="space-y-4">
-        <legend class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <legend class="text-lg font-semibold text-white mb-4">
           {{ t('bricksets.create.section.status') }}
         </legend>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <BaseSelect
+          <BaseCustomSelect
             :model-value="form.formData.productionStatus"
             :label="t('bricksets.create.fields.productionStatus.label')"
             :options="productionStatusOptions"
@@ -151,7 +151,7 @@ function handleKeyDown(event: KeyboardEvent): void {
             @blur="() => form.validateField('productionStatus')"
           />
 
-          <BaseSelect
+          <BaseCustomSelect
             :model-value="form.formData.completeness"
             :label="t('bricksets.create.fields.completeness.label')"
             :options="completenessOptions"
@@ -166,7 +166,7 @@ function handleKeyDown(event: KeyboardEvent): void {
 
       <!-- Section 3: Set Attributes -->
       <fieldset class="space-y-4">
-        <legend class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <legend class="text-lg font-semibold text-white mb-4">
           {{ t('bricksets.create.section.attributes') }}
         </legend>
 
@@ -199,7 +199,7 @@ function handleKeyDown(event: KeyboardEvent): void {
 
       <!-- Section 4: Owner's Initial Estimate (Optional) -->
       <fieldset class="space-y-4">
-        <legend class="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <legend class="text-lg font-semibold text-white mb-4">
           {{ t('bricksets.create.section.estimate') }}
         </legend>
 
@@ -213,16 +213,14 @@ function handleKeyDown(event: KeyboardEvent): void {
           @update:model-value="(val) => handleFieldChange('ownerInitialEstimate', val || null)"
           @blur="() => form.validateField('ownerInitialEstimate')"
         />
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+        <p class="text-xs text-gray-400 mt-2">
           {{ t('bricksets.create.fields.ownerInitialEstimate.hint') }}
         </p>
       </fieldset>
 
       <!-- Form Hint -->
-      <div
-        class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4"
-      >
-        <p class="text-sm text-blue-800 dark:text-blue-200">
+      <div class="bg-blue-900/30 border border-blue-700 rounded-lg p-4">
+        <p class="text-sm text-blue-200">
           {{ t('bricksets.create.formHint') }}
         </p>
       </div>
@@ -233,7 +231,7 @@ function handleKeyDown(event: KeyboardEvent): void {
       <button
         type="button"
         :disabled="form.isSubmitting.value"
-        class="px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 text-gray-900 dark:text-white bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed"
+        class="px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 text-white bg-gray-700 hover:bg-gray-600 disabled:opacity-60 disabled:cursor-not-allowed"
         @click="handleCancel"
       >
         {{ t('common.cancel') }}
@@ -241,7 +239,7 @@ function handleKeyDown(event: KeyboardEvent): void {
       <button
         type="submit"
         :disabled="form.hasErrors.value || form.isSubmitting.value"
-        class="px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 dark:bg-blue-700 dark:hover:bg-blue-600 dark:disabled:bg-blue-900 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        class="px-4 py-2.5 rounded-lg font-semibold transition-all duration-200 text-white bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
         <svg
           v-if="form.isSubmitting.value"

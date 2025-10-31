@@ -2,6 +2,8 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { mount } from '@vue/test-utils';
 import BrickSetCreateView from '@/pages/bricksets/BrickSetCreateView.vue';
 import { useNotificationStore } from '@/stores/notification';
+import { DuplicateError } from '@/composables/useBrickSetForm';
+import type { DuplicateSetInfo } from '@/types/bricksets';
 
 // Mock the notification store
 vi.mock('@/stores/notification', () => ({
@@ -72,7 +74,7 @@ describe('BrickSetCreateView Page', () => {
 
     const container = wrapper.find('div');
     expect(container.classes()).toContain('min-h-screen');
-    expect(container.classes()).toContain('bg-gray-50');
+    expect(container.classes()).toContain('bg-gray-900');
   });
 
   it('renders dark mode background', () => {
@@ -85,7 +87,7 @@ describe('BrickSetCreateView Page', () => {
     });
 
     const container = wrapper.find('div');
-    expect(container.classes()).toContain('dark:bg-gray-900');
+    expect(container.classes()).toContain('bg-gray-900');
   });
 
   it('mounts BrickSetForm component', () => {
@@ -181,5 +183,324 @@ describe('BrickSetCreateView Page', () => {
 
     expect(wrapper.vm).toBeDefined();
     expect(wrapper.vm.$options.name || wrapper.vm.$options.__name).toBeDefined();
+  });
+
+  describe('Duplicate Detection Modal', () => {
+    it('renders BrickSetDuplicateModal component when duplicateSetInfo is available', async () => {
+      const mockDuplicateInfo: DuplicateSetInfo = {
+        setId: 123,
+        setNumber: 10331,
+        productionStatus: 'ACTIVE',
+        completeness: 'COMPLETE',
+        hasInstructions: true,
+        hasBox: true,
+        isFactorySealed: false,
+        ownerName: 'Test User',
+      };
+
+      const duplicateError = new DuplicateError(
+        'Duplicate set',
+        'brickset_global_identity',
+        mockDuplicateInfo
+      );
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', duplicateError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: {
+              template: '<div class="duplicate-modal">Modal</div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+            },
+          },
+        },
+      });
+
+      // Trigger error to show modal
+      const button = wrapper.find('button');
+      await button.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.duplicate-modal').exists()).toBe(true);
+    });
+
+    it('modal is initially closed', () => {
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: true,
+            BrickSetDuplicateModal: {
+              template: '<div v-if="isOpen" class="modal">Modal</div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+            },
+          },
+        },
+      });
+
+      expect(wrapper.find('.modal').exists()).toBe(false);
+    });
+
+    it('opens modal when DuplicateError is emitted from form', async () => {
+      const mockDuplicateInfo: DuplicateSetInfo = {
+        setId: 123,
+        setNumber: 10331,
+        productionStatus: 'ACTIVE',
+        completeness: 'COMPLETE',
+        hasInstructions: true,
+        hasBox: true,
+        isFactorySealed: false,
+        ownerName: 'Test User',
+      };
+
+      const duplicateError = new DuplicateError(
+        'Duplicate set',
+        'brickset_global_identity',
+        mockDuplicateInfo
+      );
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', duplicateError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: {
+              template:
+                '<div v-if="isOpen" class="modal">Modal: {{ duplicateSetInfo?.setNumber }}</div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+            },
+          },
+        },
+      });
+
+      const button = wrapper.find('button');
+      await button.trigger('click');
+
+      // Wait for async updates
+      await wrapper.vm.$nextTick();
+
+      const modal = wrapper.find('.modal');
+      expect(modal.exists()).toBe(true);
+      expect(modal.text()).toContain('10331');
+    });
+
+    it('shows error notification when DuplicateError has no duplicateInfo', async () => {
+      const duplicateError = new DuplicateError(
+        'Duplicate set',
+        'brickset_global_identity',
+        undefined
+      );
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', duplicateError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: true,
+          },
+        },
+      });
+
+      const button = wrapper.find('button');
+      await button.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(mockNotificationStore.error).toHaveBeenCalledWith(
+        'bricksets.create.errors.duplicate',
+        7000
+      );
+    });
+
+    it('handles ValidationError without showing modal', async () => {
+      const validationError = {
+        name: 'ValidationError',
+        message: 'Validation failed',
+      };
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', validationError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: {
+              template: '<div v-if="isOpen" class="modal">Modal</div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+            },
+          },
+        },
+      });
+
+      const button = wrapper.find('button');
+      await button.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.modal').exists()).toBe(false);
+      expect(mockNotificationStore.error).not.toHaveBeenCalled();
+    });
+
+    it('handles generic errors with network error notification', async () => {
+      const genericError = new Error('Network error');
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', genericError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: true,
+          },
+        },
+      });
+
+      const button = wrapper.find('button');
+      await button.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(mockNotificationStore.error).toHaveBeenCalledWith('errors.networkError', 5000);
+    });
+
+    it('closes modal when close event is emitted', async () => {
+      const mockDuplicateInfo: DuplicateSetInfo = {
+        setId: 123,
+        setNumber: 10331,
+        productionStatus: 'ACTIVE',
+        completeness: 'COMPLETE',
+        hasInstructions: true,
+        hasBox: true,
+        isFactorySealed: false,
+        ownerName: 'Test User',
+      };
+
+      const duplicateError = new DuplicateError(
+        'Duplicate set',
+        'brickset_global_identity',
+        mockDuplicateInfo
+      );
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', duplicateError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: {
+              template:
+                '<div v-if="isOpen" class="modal"><button @click="$emit(\'close\')">Close</button></div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+              emits: ['close'],
+            },
+          },
+        },
+      });
+
+      // Open modal
+      const errorButton = wrapper.find('button');
+      await errorButton.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.modal').exists()).toBe(true);
+
+      // Close modal
+      const closeButton = wrapper.findAll('button')[1];
+      await closeButton.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.modal').exists()).toBe(false);
+    });
+
+    it('closes modal when navigate event is emitted', async () => {
+      const mockDuplicateInfo: DuplicateSetInfo = {
+        setId: 123,
+        setNumber: 10331,
+        productionStatus: 'ACTIVE',
+        completeness: 'COMPLETE',
+        hasInstructions: true,
+        hasBox: true,
+        isFactorySealed: false,
+        ownerName: 'Test User',
+      };
+
+      const duplicateError = new DuplicateError(
+        'Duplicate set',
+        'brickset_global_identity',
+        mockDuplicateInfo
+      );
+
+      const wrapper = mount(BrickSetCreateView, {
+        global: {
+          stubs: {
+            BrickSetForm: {
+              template: '<div><button @click="emitError">Trigger Error</button></div>',
+              emits: ['on-error'],
+              methods: {
+                emitError() {
+                  this.$emit('on-error', duplicateError);
+                },
+              },
+            },
+            BrickSetDuplicateModal: {
+              template:
+                '<div v-if="isOpen" class="modal"><button @click="$emit(\'navigate\')">Navigate</button></div>',
+              props: ['isOpen', 'duplicateSetInfo'],
+              emits: ['navigate'],
+            },
+          },
+        },
+      });
+
+      // Open modal
+      const errorButton = wrapper.find('button');
+      await errorButton.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.modal').exists()).toBe(true);
+
+      // Navigate
+      const navigateButton = wrapper.findAll('button')[1];
+      await navigateButton.trigger('click');
+      await wrapper.vm.$nextTick();
+
+      expect(wrapper.find('.modal').exists()).toBe(false);
+    });
   });
 });

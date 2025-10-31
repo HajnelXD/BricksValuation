@@ -1,9 +1,16 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 // @ts-expect-error Vitest runtime provides this module resolution during tests
 import type { DOMWrapper } from '@vue/test-utils';
 import BrickSetFiltersPanel from '@/components/bricksets/BrickSetFiltersPanel.vue';
 import type { BrickSetFiltersState } from '@/types/bricksets';
+
+// Mock i18n
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: (key: string) => key,
+  }),
+}));
 
 describe('BrickSetFiltersPanel Component', () => {
   const createFilters = (overrides: Partial<BrickSetFiltersState> = {}): BrickSetFiltersState => ({
@@ -19,21 +26,37 @@ describe('BrickSetFiltersPanel Component', () => {
     ...overrides,
   });
 
-  it('renders the component', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
+  const createWrapper = (props: { modelValue: BrickSetFiltersState; disabled?: boolean }) => {
+    return mount(BrickSetFiltersPanel, {
+      props,
+      global: {
+        stubs: {
+          BaseInput: {
+            template:
+              '<input :value="modelValue" @input="$emit(\'update:modelValue\', $event.target.value)" />',
+            props: ['modelValue', 'label', 'type', 'placeholder', 'disabled', 'clearable'],
+          },
+          BaseCustomSelect: {
+            template:
+              '<select :value="modelValue" @change="$emit(\'update:modelValue\', $event.target.value)"><option v-for="opt in options" :key="opt.value" :value="opt.value">{{ opt.label }}</option></select>',
+            props: ['modelValue', 'label', 'options', 'disabled'],
+          },
+        },
       },
+    });
+  };
+
+  it('renders the component', () => {
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     expect(wrapper.exists()).toBe(true);
   });
 
   it('displays search input field', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     const inputs = wrapper.findAll('input');
@@ -43,23 +66,19 @@ describe('BrickSetFiltersPanel Component', () => {
   it('updates search value in v-model', async () => {
     const filters = createFilters({ q: 'initial' });
 
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: filters,
-      },
+    const wrapper = createWrapper({
+      modelValue: filters,
     });
 
     expect(wrapper.props('modelValue').q).toBe('initial');
   });
 
   it('emits filter changes for search', async () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
-    const inputs = wrapper.findAll('input[type="text"]');
+    const inputs = wrapper.findAll('input');
     if (inputs.length > 0) {
       await inputs[0].setValue('test search');
       const emitted = wrapper.emitted('update:modelValue');
@@ -68,40 +87,32 @@ describe('BrickSetFiltersPanel Component', () => {
   });
 
   it('displays production status filter options', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     expect(wrapper.exists()).toBe(true);
   });
 
   it('displays completeness filter options', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     expect(wrapper.exists()).toBe(true);
   });
 
   it('displays ordering select dropdown', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     expect(wrapper.exists()).toBe(true);
   });
 
   it('displays checkboxes for boolean filters', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     const checkboxes = wrapper.findAll('input[type="checkbox"]');
@@ -117,23 +128,19 @@ describe('BrickSetFiltersPanel Component', () => {
       ordering: 'created_at' as const,
     });
 
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: filters,
-      },
+    const wrapper = createWrapper({
+      modelValue: filters,
     });
 
     expect(wrapper.props('modelValue').q).toBe('lego');
   });
 
   it('emits filter-change event when filters change', async () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
-    const inputs = wrapper.findAll('input[type="text"]');
+    const inputs = wrapper.findAll('input');
     if (inputs.length > 0) {
       await inputs[0].setValue('new value');
       const emitted = wrapper.emitted('update:modelValue');
@@ -142,11 +149,9 @@ describe('BrickSetFiltersPanel Component', () => {
   });
 
   it('disables inputs when isLoading is true', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-        disabled: true,
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
+      disabled: true,
     });
 
     const inputs = wrapper.findAll('input');
@@ -159,10 +164,8 @@ describe('BrickSetFiltersPanel Component', () => {
   });
 
   it('displays reset button', () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters(),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters(),
     });
 
     const buttons = wrapper.findAll('button');
@@ -170,10 +173,8 @@ describe('BrickSetFiltersPanel Component', () => {
   });
 
   it('emits reset event when reset button clicked', async () => {
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: createFilters({ q: 'something' }),
-      },
+    const wrapper = createWrapper({
+      modelValue: createFilters({ q: 'something' }),
     });
 
     const buttons = wrapper.findAll('button');
@@ -198,10 +199,8 @@ describe('BrickSetFiltersPanel Component', () => {
       has_instructions: null,
     });
 
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: filters,
-      },
+    const wrapper = createWrapper({
+      modelValue: filters,
     });
 
     expect(wrapper.exists()).toBe(true);
@@ -210,10 +209,8 @@ describe('BrickSetFiltersPanel Component', () => {
   it('updates when filters prop changes', async () => {
     const initialFilters = createFilters({ q: 'initial' });
 
-    const wrapper = mount(BrickSetFiltersPanel, {
-      props: {
-        modelValue: initialFilters,
-      },
+    const wrapper = createWrapper({
+      modelValue: initialFilters,
     });
 
     const newFilters = createFilters({ q: 'updated' });
