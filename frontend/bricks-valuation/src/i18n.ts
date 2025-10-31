@@ -20,6 +20,11 @@ const messages = {
     },
     auth: {
       noAccountPrompt: 'Jeśli nie masz konta, kliknij',
+      prompt: {
+        message: 'Zaloguj się, aby polajkować wyceny i dodać własne',
+        login: 'Zaloguj się',
+        register: 'Zarejestruj się',
+      },
     },
     login: {
       title: 'Logowanie',
@@ -167,6 +172,26 @@ const messages = {
         helpText:
           'Możesz przejść do istniejącego zestawu, aby sprawdzić jego szczegóły i wyceny, lub zamknąć to okno i zmodyfikować dane formularza.',
         viewExisting: 'Przejdź do istniejącego zestawu',
+      },
+      detail: {
+        back: 'Wróć',
+        ownerEstimate: 'Wycena właściciela',
+        created: 'Dodano',
+        topValuation: 'Najwyżej oceniana wycena',
+        by: 'Dodał',
+        user: 'użytkownik',
+        showMore: 'Pokaż więcej',
+        showLess: 'Pokaż mniej',
+        likeButton: 'Polajkuj',
+        liked: 'Polajkowano',
+        valuations: 'Wyceny',
+        noValuations: 'Brak wycen dla tego zestawu',
+        beFirst: 'Bądź pierwszym, który doda wycenę!',
+      },
+      card: {
+        instructionsTitle: 'Ma instrukcje',
+        boxTitle: 'Ma pudełko',
+        sealedTitle: 'Zapieczętowany fabrycznie',
       },
     },
     pages: {

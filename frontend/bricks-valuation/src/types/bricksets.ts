@@ -246,3 +246,105 @@ export const DEFAULT_BRICKSET_FORM_DATA: BrickSetFormData = {
   ownerInitialEstimate: null,
   isDirty: false,
 };
+
+/**
+ * DTO - Szczegóły zestawu z API
+ * Endpoint: GET /api/v1/bricksets/{id}
+ */
+export interface BrickSetDetailDTO {
+  id: number;
+  number: number;
+  production_status: ProductionStatus;
+  completeness: Completeness;
+  has_instructions: boolean;
+  has_box: boolean;
+  is_factory_sealed: boolean;
+  owner_initial_estimate: number | null;
+  owner_id: number;
+  valuations: ValuationDTO[];
+  valuations_count: number;
+  total_likes: number;
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
+}
+
+/**
+ * DTO - Pojedyncza wycena w odpowiedzi z API
+ */
+export interface ValuationDTO {
+  id: number;
+  user_id: number;
+  value: number;
+  currency: Currency; // "PLN"
+  comment: string;
+  likes_count: number;
+  created_at: string; // ISO 8601
+}
+
+/**
+ * ViewModel - Szczegóły zestawu dla UI
+ */
+export interface BrickSetDetailViewModel {
+  id: number;
+  number: string; // formatowany z zerami wiodącymi
+  productionStatusLabel: string;
+  completenessLabel: string;
+  hasInstructions: boolean;
+  hasBox: boolean;
+  isFactorySealed: boolean;
+  ownerInitialEstimate: number | null;
+  ownerId: number;
+  valuationsCount: number;
+  totalLikes: number;
+  topValuation: TopValuationDetailViewModel | null;
+  valuations: ValuationViewModel[];
+  createdAtRelative: string;
+  createdAt: string; // ISO dla potrzeb wewnętrznych
+}
+
+/**
+ * ViewModel - Wyróżniona TOP wycena
+ */
+export interface TopValuationDetailViewModel {
+  id: number;
+  userId: number;
+  valueFormatted: string; // "450 PLN"
+  comment: string;
+  likesCount: number;
+  createdAtRelative: string;
+}
+
+/**
+ * ViewModel - Pojedyncza wycena w liście
+ */
+export interface ValuationViewModel {
+  id: number;
+  userId: number;
+  valueFormatted: string; // "400 PLN"
+  comment: string;
+  likesCount: number;
+  createdAtRelative: string;
+  createdAt: string; // ISO dla sortowania
+}
+
+/**
+ * ViewModel - Nagłówek zestawu
+ */
+export interface BrickSetHeaderViewModel {
+  number: string;
+  productionStatusLabel: string;
+  completenessLabel: string;
+  hasInstructions: boolean;
+  hasBox: boolean;
+  isFactorySealed: boolean;
+  ownerInitialEstimate: number | null;
+  createdAtRelative: string;
+}
+
+/**
+ * ViewModel - Statystyki zestawu
+ */
+export interface BrickSetStatsViewModel {
+  valuationsCount: number;
+  totalLikes: number;
+}

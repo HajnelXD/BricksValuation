@@ -16,6 +16,11 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/bricksets/LandingBrickSetListView.vue'),
   },
   {
+    path: '/bricksets/:id',
+    name: 'brickset-detail',
+    component: () => import('../pages/bricksets/PublicBrickSetDetailView.vue'),
+  },
+  {
     path: '/login',
     name: 'login',
     component: () => import('../pages/auth/LoginView.vue'),
