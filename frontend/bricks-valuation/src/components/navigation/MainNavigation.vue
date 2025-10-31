@@ -28,9 +28,9 @@ const navTiles = computed(() => [
     isAction: false,
   },
   {
-    name: 'app-bricksets' as const,
-    label: t('nav.appSets'),
-    icon: '🗂',
+    name: 'brickset-create' as const,
+    label: t('bricksets.create.addNew'),
+    icon: '➕',
     requiresAuth: true,
     isAction: false,
   },
@@ -79,31 +79,33 @@ async function handleLogout() {
 <template>
   <nav
     v-if="isAuthenticated"
-    class="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 shadow-sm z-50"
+    class="fixed top-0 left-0 right-0 bg-gray-900 border-b border-gray-800 shadow-lg z-50"
   >
     <div class="mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex h-20 gap-8">
-        <!-- Navigation Tiles -->
-        <div class="flex items-start gap-8">
+      <div class="flex h-16 items-center gap-4">
+        <!-- Navigation Links -->
+        <div class="flex items-center gap-2">
           <template v-for="link in visibleNavigationLinks" :key="link.name">
             <!-- Logout Button (Action Button) -->
-            <a
+            <button
               v-if="link.isAction"
-              class="px-4 py-2 transition-all duration-200 text-sm font-medium whitespace-nowrap bg-blue-100 text-blue-700 border border-blue-300 cursor-pointer"
+              type="button"
+              class="px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white border border-gray-700 hover:border-gray-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              :disabled="isLoggingOut"
               @click="handleLogout"
             >
               <span class="mr-2">{{ link.icon }}</span
               >{{ link.label }}
-            </a>
+            </button>
             <!-- Regular Navigation Link -->
             <RouterLink
               v-else
               :to="{ name: link.name }"
-              class="px-4 py-2 transition-all duration-200 text-sm font-medium whitespace-nowrap"
+              class="px-3 py-2 rounded-md transition-all duration-200 text-sm font-medium whitespace-nowrap border"
               :class="
                 isActive(link.name)
-                  ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                  : 'text-gray-700 hover:bg-gray-100 border border-transparent hover:border-gray-300'
+                  ? 'bg-gray-800 text-white border-gray-600'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-gray-200 border-transparent hover:border-gray-700'
               "
             >
               <span class="mr-2">{{ link.icon }}</span
@@ -115,15 +117,5 @@ async function handleLogout() {
     </div>
   </nav>
   <!-- Spacer to prevent content from hiding under fixed nav -->
-  <div v-if="isAuthenticated" class="h-20"></div>
+  <div v-if="isAuthenticated" class="h-16"></div>
 </template>
-
-<style scoped>
-nav {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 50;
-}
-</style>

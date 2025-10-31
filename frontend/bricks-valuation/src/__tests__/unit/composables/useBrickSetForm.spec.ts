@@ -326,8 +326,85 @@ describe('useBrickSetForm Composable', () => {
       form.formData.number = '10331';
       form.formData.productionStatus = 'ACTIVE';
       form.formData.completeness = 'COMPLETE';
+      form.formData.hasInstructions = true;
+      form.formData.hasBox = false;
+      form.formData.isFactorySealed = false;
 
       await expect(form.submitForm()).rejects.toThrow(DuplicateError);
+    });
+
+    it('stores duplicate set info when 409 error occurs', async () => {
+      const mockError = {
+        response: {
+          status: 409,
+          data: {
+            detail: 'Duplicate set',
+            constraint: 'brickset_global_identity',
+          },
+        },
+      };
+
+      vi.mocked(axiosInstance.post).mockRejectedValueOnce(mockError);
+
+      const form = useBrickSetForm();
+      form.formData.number = '10331';
+      form.formData.productionStatus = 'ACTIVE';
+      form.formData.completeness = 'COMPLETE';
+      form.formData.hasInstructions = true;
+      form.formData.hasBox = true;
+      form.formData.isFactorySealed = false;
+
+      try {
+        await form.submitForm();
+      } catch {
+        // duplicateSetInfo should be populated
+        expect(form.duplicateSetInfo.value).not.toBeNull();
+        expect(form.duplicateSetInfo.value?.setNumber).toBe(10331);
+        expect(form.duplicateSetInfo.value?.productionStatus).toBe('ACTIVE');
+        expect(form.duplicateSetInfo.value?.completeness).toBe('COMPLETE');
+        expect(form.duplicateSetInfo.value?.hasInstructions).toBe(true);
+        expect(form.duplicateSetInfo.value?.hasBox).toBe(true);
+        expect(form.duplicateSetInfo.value?.isFactorySealed).toBe(false);
+      }
+    });
+
+    it('includes duplicate info in DuplicateError', async () => {
+      const mockError = {
+        response: {
+          status: 409,
+          data: {
+            detail: 'Duplicate set',
+            constraint: 'brickset_global_identity',
+          },
+        },
+      };
+
+      vi.mocked(axiosInstance.post).mockRejectedValueOnce(mockError);
+
+      const form = useBrickSetForm();
+      form.formData.number = '10331';
+      form.formData.productionStatus = 'RETIRED';
+      form.formData.completeness = 'INCOMPLETE';
+      form.formData.hasInstructions = false;
+      form.formData.hasBox = true;
+      form.formData.isFactorySealed = true;
+
+      try {
+        await form.submitForm();
+        expect.fail('Should have thrown DuplicateError');
+      } catch (error) {
+        expect(error).toBeInstanceOf(DuplicateError);
+        const duplicateError = error as DuplicateError;
+        expect(duplicateError.message).toBe('Duplicate set');
+        expect(duplicateError.constraint).toBe('brickset_global_identity');
+        expect(duplicateError.duplicateInfo).toBeDefined();
+        expect(duplicateError.duplicateInfo?.setNumber).toBe(10331);
+        expect(duplicateError.duplicateInfo?.productionStatus).toBe('RETIRED');
+        expect(duplicateError.duplicateInfo?.completeness).toBe('INCOMPLETE');
+        expect(duplicateError.duplicateInfo?.hasInstructions).toBe(false);
+        expect(duplicateError.duplicateInfo?.hasBox).toBe(true);
+        expect(duplicateError.duplicateInfo?.isFactorySealed).toBe(true);
+      }
     });
 
     it('handles 401 unauthorized error', async () => {

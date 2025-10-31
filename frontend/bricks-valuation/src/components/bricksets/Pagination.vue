@@ -47,7 +47,7 @@ function handlePageChange(newPage: number) {
     <button
       :disabled="page === 1 || loading"
       data-testid="prev-page-btn"
-      class="px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50 transition-colors"
+      class="px-3 py-2 border border-gray-700 bg-gray-800 text-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-700 transition-colors"
       :aria-label="`Poprzednia strona`"
       @click="handlePageChange(page - 1)"
     >
@@ -66,7 +66,7 @@ function handlePageChange(newPage: number) {
           'px-3 py-2 border rounded-md text-sm transition-colors',
           page === pageNum
             ? 'bg-blue-600 text-white border-blue-600'
-            : 'border-gray-300 hover:bg-gray-100',
+            : 'border-gray-700 bg-gray-800 text-gray-300 hover:bg-gray-700',
           'disabled:opacity-50',
         ]"
         @click="handlePageChange(pageNum)"
@@ -79,7 +79,7 @@ function handlePageChange(newPage: number) {
     <button
       :disabled="page >= totalPages || loading"
       data-testid="next-page-btn"
-      class="px-3 py-2 border border-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-50 transition-colors"
+      class="px-3 py-2 border border-gray-700 bg-gray-800 text-gray-300 rounded-md text-sm disabled:opacity-50 hover:bg-gray-700 transition-colors"
       :aria-label="`Następna strona`"
       @click="handlePageChange(page + 1)"
     >

@@ -22,6 +22,7 @@ import type {
   CreateBrickSetRequest,
   CreateBrickSetResponse,
   BrickSetValidationError,
+  DuplicateSetInfo,
 } from '@/types/bricksets';
 
 const API_BASE_URL = `/v${env.api.version}/bricksets`;
@@ -320,9 +321,23 @@ export function useBrickSetForm() {
       // 409 - Duplicate set
       if (status === 409 && typeof data === 'object' && data !== null) {
         const duplicateData = data as Record<string, unknown>;
+
+        // Store duplicate info for modal display
+        duplicateSetInfo.value = {
+          setId: 0, // Will be populated by parent component via search
+          setNumber: parseInt(formData.number, 10),
+          productionStatus: formData.productionStatus,
+          completeness: formData.completeness,
+          hasInstructions: formData.hasInstructions,
+          hasBox: formData.hasBox,
+          isFactorySealed: formData.isFactorySealed,
+          ownerName: '', // Not available from error response
+        };
+
         const duplicateError = new DuplicateError(
           (duplicateData.detail as string) || t('bricksets.create.errors.duplicate'),
-          (duplicateData.constraint as string) || 'brickset_global_identity'
+          (duplicateData.constraint as string) || 'brickset_global_identity',
+          duplicateSetInfo.value
         );
         throw duplicateError;
       }

@@ -46,7 +46,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -61,7 +61,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -76,7 +76,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -99,7 +99,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -117,7 +117,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -139,7 +139,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -159,7 +159,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -177,7 +177,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -195,7 +195,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -218,7 +218,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -236,7 +236,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -251,7 +251,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -268,7 +268,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -288,7 +288,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: true,
+          BaseCustomSelect: true,
           BaseCheckbox: true,
           ValidationErrorList: true,
         },
@@ -311,7 +311,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: {
+          BaseCustomSelect: {
             template:
               '<select><option v-for="opt in options" :key="opt.value">{{ opt.label }}</option></select>',
             props: ['options'],
@@ -331,7 +331,7 @@ describe('BrickSetForm Component', () => {
       global: {
         stubs: {
           BaseInput: true,
-          BaseSelect: {
+          BaseCustomSelect: {
             template:
               '<select><option v-for="opt in options" :key="opt.value">{{ opt.label }}</option></select>',
             props: ['options'],

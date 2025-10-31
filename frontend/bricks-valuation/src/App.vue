@@ -4,9 +4,9 @@ import NotificationToaster from '@/components/base/NotificationToaster.vue';
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen bg-gray-50 text-gray-900">
+  <div class="flex flex-col min-h-screen bg-gray-900 text-gray-100">
     <MainNavigation />
-    <main class="flex-1 pt-20">
+    <main class="flex-1">
       <RouterView />
     </main>
     <NotificationToaster />
