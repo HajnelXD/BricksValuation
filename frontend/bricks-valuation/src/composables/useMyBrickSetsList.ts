@@ -85,7 +85,7 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
   const page = ref(validatePage(route.query.page));
   const pageSize = ref(validatePageSize(route.query.page_size || 10));
   const ordering = ref<SortOrderingValue>(
-    isValidMyBrickSetsOrdering(route.query.ordering) ? route.query.ordering : '-created_at'
+    isValidMyBrickSetsOrdering(route.query.ordering) ? (route.query.ordering as SortOrderingValue) : '-created_at'
   );
 
   // Computed filter state
