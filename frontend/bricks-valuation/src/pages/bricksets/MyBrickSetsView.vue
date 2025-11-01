@@ -27,34 +27,8 @@ const router = useRouter();
 const { t } = useI18n();
 
 // Use composable
-console.log('[MyBrickSetsView] About to call useMyBrickSetsList');
-let composableResult;
-try {
-  composableResult = useMyBrickSetsList();
-  console.log('[MyBrickSetsView] Composable called successfully');
-} catch (e) {
-  console.error('[MyBrickSetsView] Error calling composable:', e);
-  throw e;
-}
-
-if (!composableResult) {
-  console.error('[MyBrickSetsView] Composable returned undefined or null!');
-  throw new Error('useMyBrickSetsList returned undefined');
-}
-
 const { bricksets, totalCount, isLoading, error, filters, changePage, changeSorting, refreshList } =
-  composableResult;
-
-console.log('[MyBrickSetsView] Destructured from composable:', {
-  bricksets,
-  totalCount,
-  isLoading,
-  error,
-  filters,
-});
-console.log('[MyBrickSetsView] bricksets.value:', bricksets?.value);
-console.log('[MyBrickSetsView] totalCount.value:', totalCount?.value);
-console.log('[MyBrickSetsView] isLoading.value:', isLoading?.value);
+  useMyBrickSetsList();
 
 // Sort options with i18n labels
 const sortOptions = computed<SortOption[]>(() => [

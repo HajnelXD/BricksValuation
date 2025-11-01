@@ -70,13 +70,9 @@ function validatePageSize(pageSize: unknown): number {
  * Composable for managing user's bricksets list
  */
 export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
-  console.log('[useMyBrickSetsList] Starting initialization');
-
   const route = useRoute();
   const router = useRouter();
   const { t } = useI18n();
-
-  console.log('[useMyBrickSetsList] Vue composables initialized successfully');
 
   // State
   const bricksets = ref<OwnedBrickSetViewModel[]>([]);
@@ -84,8 +80,6 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
   const isLoading = ref(false);
   const error = ref<Error | null>(null);
   const abortController = ref<AbortController | null>(null);
-
-  console.log('[useMyBrickSetsList] Refs created:', { bricksets, totalCount, isLoading, error });
 
   // Filters from query params
   const page = ref(validatePage(route.query.page));
@@ -299,7 +293,7 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
     }
   });
 
-  const result: UseMyBrickSetsListReturn = {
+  return {
     bricksets,
     totalCount,
     isLoading,
@@ -313,11 +307,4 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
     changeSorting,
     refreshList,
   };
-
-  console.log('[useMyBrickSetsList] Returning result:', result);
-  console.log('[useMyBrickSetsList] bricksets.value:', bricksets.value);
-  console.log('[useMyBrickSetsList] totalCount.value:', totalCount.value);
-  console.log('[useMyBrickSetsList] isLoading.value:', isLoading.value);
-
-  return result;
 }
