@@ -406,3 +406,86 @@ export interface DeleteConfirmData {
  * Rule lock badge type
  */
 export type RuleLockType = 'edit' | 'delete' | 'both';
+
+/**
+ * Valuation Creation Types
+ */
+
+/**
+ * DTO - Request payload for creating a valuation
+ * Endpoint: POST /api/v1/bricksets/{brickset_id}/valuations
+ */
+export interface CreateValuationRequest {
+  value: number; // 1-999,999
+  currency?: string; // Optional, defaults to "PLN"
+  comment?: string; // Optional, max 2000 characters
+}
+
+/**
+ * DTO - Response from API after successful valuation creation
+ */
+export interface CreateValuationResponse {
+  id: number;
+  brickset_id: number;
+  user_id: number;
+  value: number;
+  currency: string; // e.g., "PLN"
+  comment: string | null;
+  likes_count: number;
+  created_at: string; // ISO 8601
+  updated_at: string; // ISO 8601
+}
+
+/**
+ * Form data ViewModel - String representation for input binding
+ * Used in ValuationFormCard for v-model binding
+ */
+export interface ValuationFormData {
+  value: number | null; // null initially, number after input
+  comment: string; // Empty string initially
+}
+
+/**
+ * Field-level validation errors for valuation form
+ */
+export interface ValuationValidationErrors {
+  value?: string; // Error message for value field
+  comment?: string; // Error message for comment field
+  general?: string; // General API error message
+}
+
+/**
+ * API Error response wrapper
+ * Handles various error scenarios (validation, duplicate, server error, etc.)
+ */
+export interface ApiErrorResponse {
+  code: string; // e.g., "VALUATION_DUPLICATE", "VALIDATION_ERROR", "BRICKSET_NOT_FOUND"
+  message: string; // User-friendly error message
+  status: number; // HTTP status code
+  details?: Record<string, string[]>; // Optional validation error details per field
+}
+
+/**
+ * Default valuation form data for initialization
+ */
+export const DEFAULT_VALUATION_FORM_DATA: ValuationFormData = {
+  value: null,
+  comment: '',
+};
+
+/**
+ * API Response wrapper for valuation form composable
+ */
+export interface UseValuationFormResult {
+  formData: Readonly<Ref<ValuationFormData>>;
+  errors: Readonly<Ref<ValuationValidationErrors>>;
+  isSubmitting: Readonly<Ref<boolean>>;
+  touchedFields: Readonly<Ref<Set<string>>>;
+  isFormValid: ComputedRef<boolean>;
+  canSubmit: ComputedRef<boolean>;
+  validateField: (fieldName: keyof ValuationFormData) => void;
+  validateForm: () => boolean;
+  resetForm: () => void;
+  handleSubmit: () => Promise<CreateValuationResponse | null>;
+  markFieldTouched: (fieldName: string) => void;
+}
