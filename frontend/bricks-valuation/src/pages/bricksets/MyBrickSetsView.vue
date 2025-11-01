@@ -74,6 +74,7 @@ const sortOptions = computed<SortOption[]>(() => [
 
 // Computed properties
 const hasError = computed(() => error.value !== null);
+const isReady = computed(() => filters !== undefined && bricksets !== undefined && isLoading !== undefined);
 
 /**
  * Handle card click - navigate to brickset details
@@ -119,8 +120,8 @@ function handleRetry() {
       <p class="text-gray-400">{{ totalCount?.value ?? 0 }} {{ $t('bricksets.subtitle') }}</p>
     </div>
 
-    <!-- Controls Section (only show once filters are initialized) -->
-    <template v-if="filters && bricksets && isLoading">
+    <!-- Controls Section (only show once all refs are initialized) -->
+    <template v-if="isReady">
       <div class="flex items-center justify-between gap-4 mb-6">
         <div>
           <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
