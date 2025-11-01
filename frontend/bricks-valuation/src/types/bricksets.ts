@@ -561,6 +561,98 @@ export interface UseLikeValuationResult {
 }
 
 /**
+ * My BrickSets View Types
+ * FR-14: Widok "Moje Zestawy" - lista zestawów użytkownika z wycenami i polubienia
+ */
+
+/**
+ * DTO - Pojedynczy zestaw użytkownika z metrykami
+ * Odpowiedź z GET /api/v1/users/me/bricksets
+ */
+export interface OwnedBrickSetDTO {
+  id: number; // Unikalny identyfikator zestawu
+  number: number; // Numer zestawu LEGO
+  production_status: ProductionStatus; // Status produkcji (ACTIVE|RETIRED)
+  completeness: Completeness; // Kompletność (COMPLETE|INCOMPLETE)
+  valuations_count: number; // Liczba wycen dodanych do zestawu
+  total_likes: number; // Suma wszystkich polubień wycen tego zestawu
+  editable: boolean; // Czy zestaw może być edytowany (RB-01)
+}
+
+/**
+ * DTO - Response z listy moich zestawów
+ */
+export interface OwnedBrickSetListResponseDTO {
+  count: number; // Całkowita liczba zestawów
+  next: string | null; // Link do następnej strony
+  previous: string | null; // Link do poprzedniej strony
+  results: OwnedBrickSetDTO[]; // Zestawy na bieżącej stronie
+}
+
+/**
+ * ViewModel - Sformatowany zestaw do wyświetlenia w liście
+ */
+export interface OwnedBrickSetViewModel {
+  id: number;
+  number: string; // Sformatowany numer zestawu
+  productionStatusLabel: string; // Etykieta statusu produkcji
+  completenessLabel: string; // Etykieta kompletności
+  valuationsCount: number;
+  totalLikes: number;
+  editable: boolean;
+}
+
+/**
+ * ViewModel - Filtry i parametry paginacji dla listy moich zestawów
+ */
+export interface MyBrickSetsFilters {
+  page: number; // Numer aktualnej strony (od 1)
+  page_size: number; // Liczba wyników na stronę (domyślnie 10)
+  ordering: SortOrderingValue; // Sortowanie
+}
+
+/**
+ * ViewModel - Możliwe wartości sortowania
+ */
+export type SortOrderingValue = '-created_at' | '-valuations' | '-likes';
+
+/**
+ * ViewModel - Opcja sortowania w kontrolce
+ */
+export interface SortOption {
+  value: SortOrderingValue;
+  label: string;
+}
+
+/**
+ * ViewModel - Stan composable do zarządzania listą zestawów użytkownika
+ */
+export interface UseMyBrickSetsListReturn {
+  bricksets: Ref<OwnedBrickSetViewModel[]>;
+  totalCount: Ref<number>;
+  isLoading: Ref<boolean>;
+  error: Ref<Error | null>;
+  filters: ComputedRef<MyBrickSetsFilters>;
+  totalPages: ComputedRef<number>;
+  hasNextPage: ComputedRef<boolean>;
+  hasPreviousPage: ComputedRef<boolean>;
+  fetchBrickSets: () => Promise<void>;
+  changePage: (page: number) => Promise<void>;
+  changeSorting: (ordering: SortOrderingValue) => Promise<void>;
+  refreshList: () => Promise<void>;
+}
+
+const VALID_MY_BRICKSETS_ORDERING: SortOrderingValue[] = [
+  '-created_at',
+  '-valuations',
+  '-likes',
+];
+
+export const isValidMyBrickSetsOrdering = (value: unknown): value is SortOrderingValue => {
+  return typeof value === 'string' && VALID_MY_BRICKSETS_ORDERING.includes(value as SortOrderingValue);
+};
+
+/**
  * My Valuations View Types
  */
 

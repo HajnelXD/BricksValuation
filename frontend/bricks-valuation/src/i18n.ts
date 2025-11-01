@@ -257,6 +257,36 @@ const messages = {
         subtitle: 'Zarządzaj swoją kolekcją',
       },
     },
+    myBrickSets: {
+      title: 'Moje Zestawy',
+      sort: {
+        label: 'Sortuj według',
+        createdAt: 'Data dodania',
+        valuations: 'Liczba wycen',
+        likes: 'Liczba polubień',
+      },
+      metrics: {
+        valuations: 'Wyceny',
+        likes: 'Polubienia',
+      },
+      editable: {
+        tooltipEditable: 'Kliknij aby edytować zestaw',
+        tooltipNotEditable: 'Nie można edytować zestawu, ponieważ posiada wyceny innych użytkowników lub polubienia',
+      },
+      empty: {
+        title: 'Nie masz jeszcze żadnych zestawów',
+        description: 'Dodaj swój pierwszy zestaw i uzyskaj wycenę od społeczności',
+        action: 'Dodaj zestaw',
+      },
+      productionStatus: {
+        active: 'Produkowany',
+        retired: 'Wycofany',
+      },
+      completeness: {
+        complete: 'Kompletny',
+        incomplete: 'Niekompletny',
+      },
+    },
     myValuations: {
       title: 'Moje wyceny',
       empty: {
