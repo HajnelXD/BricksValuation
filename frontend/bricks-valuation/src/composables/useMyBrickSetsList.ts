@@ -70,16 +70,17 @@ function validatePageSize(pageSize: unknown): number {
  * Composable for managing user's bricksets list
  */
 export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
-  const route = useRoute();
-  const router = useRouter();
-  const { t } = useI18n();
-
-  // State
+  // State - Create refs FIRST before any other operations
   const bricksets = ref<OwnedBrickSetViewModel[]>([]);
   const totalCount = ref(0);
   const isLoading = ref(false);
   const error = ref<Error | null>(null);
   const abortController = ref<AbortController | null>(null);
+
+  // Now get composables
+  const route = useRoute();
+  const router = useRouter();
+  const { t } = useI18n();
 
   // Filters from query params
   const page = ref(validatePage(route.query.page));

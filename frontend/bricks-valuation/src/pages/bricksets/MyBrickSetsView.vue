@@ -48,7 +48,6 @@ const sortOptions = computed<SortOption[]>(() => [
 
 // Computed properties
 const hasError = computed(() => error.value !== null);
-const isReady = computed(() => filters !== undefined && bricksets !== undefined && isLoading !== undefined);
 
 /**
  * Handle card click - navigate to brickset details
@@ -91,40 +90,33 @@ function handleRetry() {
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-white mb-2">{{ $t('myBrickSets.title') }}</h1>
-      <p class="text-gray-400">{{ totalCount?.value ?? 0 }} {{ $t('bricksets.subtitle') }}</p>
+      <p class="text-gray-400">{{ totalCount }} {{ $t('bricksets.subtitle') }}</p>
     </div>
 
-    <!-- Controls Section (only show once all refs are initialized) -->
-    <template v-if="isReady">
-      <div class="flex items-center justify-between gap-4 mb-6">
-        <div>
-          <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
-        </div>
+    <!-- Controls Section -->
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <div>
+        <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
       </div>
+    </div>
 
-      <!-- Error State -->
-      <div v-if="hasError" class="mb-6">
-        <ErrorState :error="error.value?.message || 'Unknown error'" @retry="handleRetry" />
-      </div>
+    <!-- Error State -->
+    <div v-if="hasError" class="mb-6">
+      <ErrorState :error="error?.message || 'Unknown error'" @retry="handleRetry" />
+    </div>
 
-      <!-- List Section -->
-      <div v-else>
-        <OwnedBrickSetList
-          :bricksets="bricksets.value"
-          :is-loading="isLoading.value"
-          @card-click="handleCardClick"
-          @edit-click="handleEditClick"
-        />
+    <!-- List Section -->
+    <div v-else>
+      <OwnedBrickSetList :bricksets="bricksets" :is-loading="isLoading" @card-click="handleCardClick" @edit-click="handleEditClick" />
 
-        <!-- Pagination -->
-        <PaginationControls
-          :current-page="filters.page"
-          :total-count="totalCount.value"
-          :page-size="filters.page_size"
-          @page-change="handlePageChange"
-        />
-      </div>
-    </template>
+      <!-- Pagination -->
+      <PaginationControls
+        :current-page="filters.page"
+        :total-count="totalCount"
+        :page-size="filters.page_size"
+        @page-change="handlePageChange"
+      />
+    </div>
   </div>
 </template>
 

@@ -40,7 +40,7 @@ function handleKeydown(event: KeyboardEvent) {
           ? $t('myBrickSets.editable.tooltipEditable')
           : $t('myBrickSets.editable.tooltipNotEditable')
       "
-      @click="handleClick"
+      @click.stop="handleClick"
       @keydown="handleKeydown"
       :class="[
         'p-2 rounded-lg transition-colors',
