@@ -198,6 +198,41 @@ const messages = {
         sealedTitle: 'Zapieczętowany fabrycznie',
       },
     },
+    valuation: {
+      form: {
+        title: 'Dodaj wycenę',
+        description: 'Udostępnij swoją wycenę dla tego zestawu',
+        value: {
+          label: 'Wartość (PLN)',
+          placeholder: 'np. 450',
+        },
+        comment: {
+          label: 'Komentarz (opcjonalnie)',
+          placeholder: 'Opisz stan zestawu lub inne szczegóły...',
+        },
+        submit: 'Dodaj wycenę',
+        submitting: 'Dodawanie...',
+        cancel: 'Anuluj',
+        help: {
+          valueRange: '💡 Wartość musi być między 1 a 999 999 PLN',
+          commentLength: '💡 Komentarz może mieć maksymalnie 2000 znaków',
+        },
+      },
+      errors: {
+        required: 'Pole wartość jest wymagane',
+        notNumber: 'Wartość musi być liczbą',
+        min: 'Wartość musi być większa niż 0',
+        max: 'Wartość nie może przekraczać 999 999',
+        commentTooLong: 'Komentarz nie może przekraczać 2000 znaków',
+        duplicate: 'Masz już wycenę dla tego zestawu',
+        notFound: 'Zestaw nie został znaleziony',
+        serverError: 'Wystąpił błąd. Spróbuj ponownie później',
+        networkError: 'Problem z połączeniem. Sprawdź internet i spróbuj ponownie',
+      },
+      success: {
+        created: 'Wycena została dodana!',
+      },
+    },
     pages: {
       authenticatedBricksets: {
         title: 'Moje zestawy',

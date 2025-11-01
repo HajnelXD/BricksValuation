@@ -20,6 +20,7 @@ import BrickSetHeader from '@/components/bricksets/BrickSetHeader.vue';
 import BrickSetStats from '@/components/bricksets/BrickSetStats.vue';
 import TopValuationHighlight from '@/components/bricksets/TopValuationHighlight.vue';
 import ValuationCard from '@/components/bricksets/ValuationCard.vue';
+import ValuationFormCard from '@/components/bricksets/ValuationFormCard.vue';
 import AuthPromptBanner from '@/components/auth/AuthPromptBanner.vue';
 import ErrorState from '@/components/bricksets/ErrorState.vue';
 import LoadingSkeletons from '@/components/bricksets/LoadingSkeletons.vue';
@@ -39,6 +40,25 @@ const brickSetId = computed(() => {
 
 const hasValuations = computed(() => {
   return brickSet.value && brickSet.value.valuations.length > 0;
+});
+
+/**
+ * Check if current authenticated user has already added a valuation
+ */
+const userValuationExists = computed(() => {
+  if (!authStore.isAuthenticated || !brickSet.value) {
+    return false;
+  }
+
+  return brickSet.value.valuations.some((v: { userId: number }) => v.userId === authStore.user?.id);
+});
+
+/**
+ * Determine if form should be shown
+ * Show form only if user is authenticated and doesn't have a valuation yet
+ */
+const showValuationForm = computed(() => {
+  return authStore.isAuthenticated && !userValuationExists.value;
 });
 
 const headerViewModel = computed(() => {
@@ -64,6 +84,30 @@ const statsViewModel = computed(() => {
     totalLikes: brickSet.value.totalLikes,
   };
 });
+
+/**
+ * Handle valuation creation - refresh brickset data to show new valuation
+ */
+function handleValuationCreated(): void {
+  if (!brickSetId.value) return;
+
+  // Show success notification
+  notificationStore.addNotification({
+    type: 'success',
+    message: 'Wycena została dodana!',
+  });
+
+  // Refresh brickset data from API to get updated valuations list
+  fetchBrickSet(brickSetId.value);
+
+  // Scroll to valuations section
+  setTimeout(() => {
+    const valuationsSection = document.getElementById('valuations-section');
+    if (valuationsSection) {
+      valuationsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }, 100);
+}
 
 /**
  * Handle like valuation action
@@ -181,6 +225,13 @@ onMounted(() => {
           v-if="brickSet.topValuation"
           :valuation="brickSet.topValuation"
           @click="handleTopValuationClick"
+        />
+
+        <!-- Valuation Form (Inline) -->
+        <ValuationFormCard
+          v-if="showValuationForm && brickSetId"
+          :brickset-id="brickSetId"
+          @valuation-created="handleValuationCreated"
         />
 
         <!-- Valuations Section -->
