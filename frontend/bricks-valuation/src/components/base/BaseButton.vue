@@ -51,6 +51,7 @@ const selectedVariant = (variant?: string) => {
       selectedVariant(variant),
     ]"
     :aria-busy="loading"
+    @click="$emit('click', $event)"
   >
     <!-- Spinner Icon -->
     <svg

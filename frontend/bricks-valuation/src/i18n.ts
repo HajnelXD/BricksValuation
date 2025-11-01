@@ -54,6 +54,9 @@ const messages = {
       networkError: 'Brak połączenia z serwerem. Sprawdź połączenie internetowe',
       timeout: 'Żądanie przekroczyło limit czasu. Spróbuj ponownie',
       unauthorized: 'Sesja wygasła. Zaloguj się ponownie',
+      edit_forbidden: 'Nie możesz edytować tego zestawu',
+      delete_forbidden: 'Nie możesz usunąć tego zestawu',
+      edit_delete_forbidden: 'Nie możesz edytować ani usunąć tego zestawu',
     },
     register: {
       title: 'Rejestracja',
@@ -175,6 +178,7 @@ const messages = {
       },
       detail: {
         back: 'Wróć',
+        edit: 'Edytuj zestaw',
         ownerEstimate: 'Wycena właściciela',
         created: 'Dodano',
         topValuation: 'Najwyżej oceniana wycena',

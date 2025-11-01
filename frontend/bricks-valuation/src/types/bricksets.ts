@@ -348,3 +348,61 @@ export interface BrickSetStatsViewModel {
   valuationsCount: number;
   totalLikes: number;
 }
+
+/**
+ * Edit/Delete Feature Types
+ */
+
+/**
+ * DTO - BrickSet Detail with editable/deletable flags
+ * Extended detail response for edit view with client-side calculated flags
+ *
+ * Flags are calculated on frontend based on RB-01 business rule:
+ * - editable = (total_likes === 0)
+ * - deletable = (total_likes === 0)
+ */
+export interface BrickSetEditDetailDTO extends BrickSetDetailDTO {
+  editable: boolean; // Calculated client-side based on valuations/likes
+  deletable: boolean; // Calculated client-side based on valuations/likes
+}
+
+/**
+ * DTO - Partial update request for PATCH
+ */
+export interface BrickSetUpdateDTO {
+  number?: number;
+  production_status?: ProductionStatus;
+  completeness?: Completeness;
+  has_instructions?: boolean;
+  has_box?: boolean;
+  is_factory_sealed?: boolean;
+  owner_initial_estimate?: number | null;
+}
+
+/**
+ * Form mode type
+ */
+export type FormMode = 'create' | 'edit';
+
+/**
+ * Form actions configuration
+ */
+export interface FormActionsConfig {
+  canSave: boolean;
+  canDelete: boolean;
+  isSaving: boolean;
+  isDeleting: boolean;
+}
+
+/**
+ * Delete confirmation data
+ */
+export interface DeleteConfirmData {
+  brickSetNumber: string;
+  brickSetId: number;
+}
+
+/**
+ * Rule lock badge type
+ */
+export type RuleLockType = 'edit' | 'delete' | 'both';
