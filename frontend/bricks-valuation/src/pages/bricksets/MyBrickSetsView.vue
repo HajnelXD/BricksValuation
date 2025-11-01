@@ -27,8 +27,17 @@ const router = useRouter();
 const { t } = useI18n();
 
 // Use composable
+const composableResult = useMyBrickSetsList();
 const { bricksets, totalCount, isLoading, error, filters, changePage, changeSorting, refreshList } =
-  useMyBrickSetsList();
+  composableResult;
+
+console.log('[MyBrickSetsView] Composable result:', composableResult);
+console.log('[MyBrickSetsView] bricksets:', bricksets);
+console.log('[MyBrickSetsView] totalCount:', totalCount);
+console.log('[MyBrickSetsView] isLoading:', isLoading);
+console.log('[MyBrickSetsView] bricksets.value:', bricksets?.value);
+console.log('[MyBrickSetsView] totalCount.value:', totalCount?.value);
+console.log('[MyBrickSetsView] isLoading.value:', isLoading?.value);
 
 // Sort options with i18n labels
 const sortOptions = computed<SortOption[]>(() => [
