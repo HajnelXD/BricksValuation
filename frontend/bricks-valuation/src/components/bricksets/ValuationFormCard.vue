@@ -82,7 +82,9 @@ async function handleSubmit(): Promise<void> {
 </script>
 
 <template>
-  <div class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+  <div
+    class="mt-8 p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
+  >
     <!-- Card Header -->
     <div class="mb-6">
       <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
@@ -132,15 +134,15 @@ async function handleSubmit(): Promise<void> {
           full-width
         >
           {{
-            form.isSubmitting.value
-              ? t('valuation.form.submitting')
-              : t('valuation.form.submit')
+            form.isSubmitting.value ? t('valuation.form.submitting') : t('valuation.form.submit')
           }}
         </BaseButton>
       </div>
 
       <!-- Validation Help Text -->
-      <div class="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-4 pt-2 border-t border-gray-200 dark:border-gray-700">
+      <div
+        class="text-xs text-gray-500 dark:text-gray-400 space-y-1 mt-4 pt-2 border-t border-gray-200 dark:border-gray-700"
+      >
         <p>{{ t('valuation.form.help.valueRange') }}</p>
       </div>
     </form>

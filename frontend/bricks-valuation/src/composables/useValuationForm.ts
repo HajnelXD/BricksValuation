@@ -212,13 +212,9 @@ export function useValuationForm(bricksetId: number) {
     try {
       const request = convertFormDataToRequest();
 
-      const response = (await apiClient.post(
-        `${API_BASE_URL}/${bricksetId}/valuations`,
-        request,
-        {
-          withCredentials: true,
-        }
-      )) as { data: CreateValuationResponse };
+      const response = (await apiClient.post(`${API_BASE_URL}/${bricksetId}/valuations`, request, {
+        withCredentials: true,
+      })) as { data: CreateValuationResponse };
 
       return response.data;
     } catch (err: unknown) {
