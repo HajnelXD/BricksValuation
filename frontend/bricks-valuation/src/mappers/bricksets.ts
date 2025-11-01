@@ -16,6 +16,8 @@ import type {
   ValuationDTO,
   ValuationViewModel,
   TopValuationDetailViewModel,
+  OwnedValuationListItemDTO,
+  OwnValuationViewModel,
 } from '@/types/bricksets';
 import { VALID_ORDERING_OPTIONS } from '@/types/bricksets';
 
@@ -211,6 +213,24 @@ export function mapBrickSetDetailDtoToViewModel(dto: BrickSetDetailDTO): BrickSe
     totalLikes: dto.total_likes,
     topValuation,
     valuations: sortedValuations.map(mapValuationDtoToViewModel),
+    createdAtRelative: formatRelativeTime(dto.created_at),
+    createdAt: dto.created_at,
+  };
+}
+
+/**
+ * Map OwnedValuationDTO to OwnValuationViewModel
+ * Używane w widoku "Moje wyceny"
+ */
+export function mapOwnedValuationDtoToViewModel(
+  dto: OwnedValuationListItemDTO
+): OwnValuationViewModel {
+  return {
+    id: dto.id,
+    bricksetId: dto.brickset.id,
+    bricksetNumber: String(dto.brickset.number).padStart(5, '0'),
+    valueFormatted: formatCurrency(dto.value),
+    likesCount: dto.likes_count,
     createdAtRelative: formatRelativeTime(dto.created_at),
     createdAt: dto.created_at,
   };

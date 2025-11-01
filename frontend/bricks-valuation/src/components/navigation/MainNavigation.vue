@@ -35,6 +35,13 @@ const navTiles = computed(() => [
     isAction: false,
   },
   {
+    name: 'my-valuations' as const,
+    label: t('nav.myValuations'),
+    icon: '⭐',
+    requiresAuth: true,
+    isAction: false,
+  },
+  {
     name: 'logout' as const,
     label: t('nav.logout'),
     icon: '🚪',

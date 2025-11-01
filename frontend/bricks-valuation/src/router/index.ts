@@ -44,6 +44,12 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/bricksets/BrickSetEditView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/my-valuations',
+    name: 'my-valuations',
+    component: () => import('../pages/valuations/MyValuationsView.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({

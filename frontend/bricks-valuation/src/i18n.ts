@@ -233,11 +233,49 @@ const messages = {
         created: 'Wycena została dodana!',
       },
     },
+    likes: {
+      button: {
+        like: 'Polub wycenę',
+        liked: 'Już polajkowałeś',
+        loginToLike: 'Zaloguj się aby lajkować',
+      },
+      errors: {
+        ownValuation: 'Nie możesz polajkować własnej wyceny',
+        duplicate: 'Już polajkowałeś tę wycenę',
+        notFound: 'Wycena nie istnieje',
+        unauthorized: 'Zaloguj się aby lajkować',
+        network: 'Błąd połączenia - spróbuj ponownie',
+        server: 'Błąd serwera - spróbuj później',
+      },
+      success: {
+        liked: 'Wycena została polajkowana!',
+      },
+    },
     pages: {
       authenticatedBricksets: {
         title: 'Moje zestawy',
         subtitle: 'Zarządzaj swoją kolekcją',
       },
+    },
+    myValuations: {
+      title: 'Moje wyceny',
+      empty: {
+        title: 'Nie dodałeś jeszcze żadnych wycen',
+        description: 'Przeglądaj zestawy i dodawaj swoje wyceny',
+      },
+      goToSets: 'Przejdź do zestawów',
+      navigateToBrickset: 'Przejdź do zestawu',
+      addValuation: 'Dodaj wycenę',
+      error: {
+        title: 'Coś poszło nie tak',
+      },
+    },
+    pagination: {
+      previous: 'Poprzednia',
+      next: 'Następna',
+      page: 'Strona',
+      of: 'z',
+      valuations: 'wycen',
     },
   },
 };
