@@ -27,7 +27,7 @@ const router = useRouter();
 const { t } = useI18n();
 
 // Use composable
-const { bricksets, totalCount, isLoading, error, filters, totalPages, changePage, changeSorting, refreshList } =
+const { bricksets, totalCount, isLoading, error, filters, changePage, changeSorting, refreshList } =
   useMyBrickSetsList();
 
 // Sort options with i18n labels

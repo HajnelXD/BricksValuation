@@ -41,8 +41,8 @@ function mapOwnedBrickSetDtoToViewModel(
   return {
     id: dto.id,
     number: dto.number.toString().padStart(5, '0'),
-    productionStatusLabel: productionStatusLabel[dto.production_status] || dto.production_status,
-    completenessLabel: completenessLabel[dto.completeness] || dto.completeness,
+    productionStatusLabel: productionStatusLabel[dto.production_status as string] || dto.production_status,
+    completenessLabel: completenessLabel[dto.completeness as string] || dto.completeness,
     valuationsCount: dto.valuations_count,
     totalLikes: dto.total_likes,
     editable: dto.editable,
@@ -125,7 +125,7 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
       });
 
       if (response.status === 200 && response.data) {
-        // Map DTO to ViewModel with i18n labels
+        // Map DTO to ViewModel with i18n labels (evaluate at fetch time, not initialization)
         const productionStatusLabel = {
           ACTIVE: t('myBrickSets.productionStatus.active'),
           RETIRED: t('myBrickSets.productionStatus.retired'),
