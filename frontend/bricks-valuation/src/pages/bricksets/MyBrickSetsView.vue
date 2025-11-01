@@ -90,38 +90,40 @@ function handleRetry() {
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-white mb-2">{{ $t('myBrickSets.title') }}</h1>
-      <p class="text-gray-400">{{ totalCount }} {{ $t('bricksets.subtitle') }}</p>
+      <p class="text-gray-400">{{ totalCount.value }} {{ $t('bricksets.subtitle') }}</p>
     </div>
 
-    <!-- Controls Section -->
-    <div class="flex items-center justify-between gap-4 mb-6">
-      <div>
-        <SortControl :model-value="filters.value.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
+    <!-- Controls Section (only show once filters are initialized) -->
+    <template v-if="filters">
+      <div class="flex items-center justify-between gap-4 mb-6">
+        <div>
+          <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
+        </div>
       </div>
-    </div>
 
-    <!-- Error State -->
-    <div v-if="hasError" class="mb-6">
-      <ErrorState :error="error?.message || 'Unknown error'" @retry="handleRetry" />
-    </div>
+      <!-- Error State -->
+      <div v-if="hasError" class="mb-6">
+        <ErrorState :error="error.value?.message || 'Unknown error'" @retry="handleRetry" />
+      </div>
 
-    <!-- List Section -->
-    <div v-else>
-      <OwnedBrickSetList
-        :bricksets="bricksets.value"
-        :is-loading="isLoading.value"
-        @card-click="handleCardClick"
-        @edit-click="handleEditClick"
-      />
+      <!-- List Section -->
+      <div v-else>
+        <OwnedBrickSetList
+          :bricksets="bricksets.value"
+          :is-loading="isLoading.value"
+          @card-click="handleCardClick"
+          @edit-click="handleEditClick"
+        />
 
-      <!-- Pagination -->
-      <PaginationControls
-        :current-page="filters.value.page"
-        :total-count="totalCount.value"
-        :page-size="filters.value.page_size"
-        @page-change="handlePageChange"
-      />
-    </div>
+        <!-- Pagination -->
+        <PaginationControls
+          :current-page="filters.page"
+          :total-count="totalCount.value"
+          :page-size="filters.page_size"
+          @page-change="handlePageChange"
+        />
+      </div>
+    </template>
   </div>
 </template>
 
