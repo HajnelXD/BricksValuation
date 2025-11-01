@@ -27,14 +27,31 @@ const router = useRouter();
 const { t } = useI18n();
 
 // Use composable
-const composableResult = useMyBrickSetsList();
+console.log('[MyBrickSetsView] About to call useMyBrickSetsList');
+let composableResult;
+try {
+  composableResult = useMyBrickSetsList();
+  console.log('[MyBrickSetsView] Composable called successfully');
+} catch (e) {
+  console.error('[MyBrickSetsView] Error calling composable:', e);
+  throw e;
+}
+
+if (!composableResult) {
+  console.error('[MyBrickSetsView] Composable returned undefined or null!');
+  throw new Error('useMyBrickSetsList returned undefined');
+}
+
 const { bricksets, totalCount, isLoading, error, filters, changePage, changeSorting, refreshList } =
   composableResult;
 
-console.log('[MyBrickSetsView] Composable result:', composableResult);
-console.log('[MyBrickSetsView] bricksets:', bricksets);
-console.log('[MyBrickSetsView] totalCount:', totalCount);
-console.log('[MyBrickSetsView] isLoading:', isLoading);
+console.log('[MyBrickSetsView] Destructured from composable:', {
+  bricksets,
+  totalCount,
+  isLoading,
+  error,
+  filters,
+});
 console.log('[MyBrickSetsView] bricksets.value:', bricksets?.value);
 console.log('[MyBrickSetsView] totalCount.value:', totalCount?.value);
 console.log('[MyBrickSetsView] isLoading.value:', isLoading?.value);
@@ -99,11 +116,11 @@ function handleRetry() {
     <!-- Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold text-white mb-2">{{ $t('myBrickSets.title') }}</h1>
-      <p class="text-gray-400">{{ totalCount.value }} {{ $t('bricksets.subtitle') }}</p>
+      <p class="text-gray-400">{{ totalCount?.value ?? 0 }} {{ $t('bricksets.subtitle') }}</p>
     </div>
 
     <!-- Controls Section (only show once filters are initialized) -->
-    <template v-if="filters">
+    <template v-if="filters && bricksets && isLoading">
       <div class="flex items-center justify-between gap-4 mb-6">
         <div>
           <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
