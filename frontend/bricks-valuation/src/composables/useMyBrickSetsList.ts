@@ -70,11 +70,13 @@ function validatePageSize(pageSize: unknown): number {
  * Composable for managing user's bricksets list
  */
 export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
+  console.log('[useMyBrickSetsList] Starting initialization');
+
   const route = useRoute();
   const router = useRouter();
   const { t } = useI18n();
 
-  console.log('[useMyBrickSetsList] Initializing composable');
+  console.log('[useMyBrickSetsList] Vue composables initialized successfully');
 
   // State
   const bricksets = ref<OwnedBrickSetViewModel[]>([]);
