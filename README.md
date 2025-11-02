@@ -26,6 +26,32 @@ To run the backend tests, execute:
 ./bin/test_backend.sh
 ```
 
+## Frontend Tests
+
+### Unit Tests
+
+To run the frontend unit tests, execute:
+
+```bash
+./bin/test_frontend.sh
+```
+
+### E2E Tests
+
+To run the frontend E2E tests (Cypress), execute:
+
+```bash
+./bin/test_e2e.sh
+```
+
+This script will:
+1. Start all Docker services in the background
+2. Wait for services to be ready
+3. Clear the database before tests
+4. Run Cypress E2E tests in headless mode
+5. Clear the database after tests
+6. Stop all services
+
 ## API Authentication
 
 ### Overview
