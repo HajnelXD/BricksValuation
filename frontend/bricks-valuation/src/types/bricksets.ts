@@ -642,14 +642,12 @@ export interface UseMyBrickSetsListReturn {
   refreshList: () => Promise<void>;
 }
 
-const VALID_MY_BRICKSETS_ORDERING: SortOrderingValue[] = [
-  '-created_at',
-  '-valuations',
-  '-likes',
-];
+const VALID_MY_BRICKSETS_ORDERING: SortOrderingValue[] = ['-created_at', '-valuations', '-likes'];
 
 export const isValidMyBrickSetsOrdering = (value: unknown): value is SortOrderingValue => {
-  return typeof value === 'string' && VALID_MY_BRICKSETS_ORDERING.includes(value as SortOrderingValue);
+  return (
+    typeof value === 'string' && VALID_MY_BRICKSETS_ORDERING.includes(value as SortOrderingValue)
+  );
 };
 
 /**

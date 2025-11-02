@@ -96,7 +96,11 @@ function handleRetry() {
     <!-- Controls Section -->
     <div class="flex items-center justify-between gap-4 mb-6">
       <div>
-        <SortControl :model-value="filters.ordering" :options="sortOptions" @update:model-value="handleSortChange" />
+        <SortControl
+          :model-value="filters.ordering"
+          :options="sortOptions"
+          @update:model-value="handleSortChange"
+        />
       </div>
     </div>
 
@@ -107,7 +111,12 @@ function handleRetry() {
 
     <!-- List Section -->
     <div v-else>
-      <OwnedBrickSetList :bricksets="bricksets" :is-loading="isLoading" @card-click="handleCardClick" @edit-click="handleEditClick" />
+      <OwnedBrickSetList
+        :bricksets="bricksets"
+        :is-loading="isLoading"
+        @card-click="handleCardClick"
+        @edit-click="handleEditClick"
+      />
 
       <!-- Pagination -->
       <PaginationControls

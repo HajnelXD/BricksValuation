@@ -41,7 +41,8 @@ function mapOwnedBrickSetDtoToViewModel(
   return {
     id: dto.id,
     number: dto.number.toString().padStart(5, '0'),
-    productionStatusLabel: productionStatusLabel[dto.production_status as string] || dto.production_status,
+    productionStatusLabel:
+      productionStatusLabel[dto.production_status as string] || dto.production_status,
     completenessLabel: completenessLabel[dto.completeness as string] || dto.completeness,
     valuationsCount: dto.valuations_count,
     totalLikes: dto.total_likes,
@@ -86,7 +87,9 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
   const page = ref(validatePage(route.query.page));
   const pageSize = ref(validatePageSize(route.query.page_size || 10));
   const ordering = ref<SortOrderingValue>(
-    isValidMyBrickSetsOrdering(route.query.ordering) ? (route.query.ordering as SortOrderingValue) : '-created_at'
+    isValidMyBrickSetsOrdering(route.query.ordering)
+      ? (route.query.ordering as SortOrderingValue)
+      : '-created_at'
   );
 
   // Computed filter state
@@ -248,7 +251,11 @@ export function useMyBrickSetsList(): UseMyBrickSetsListReturn {
         : '-created_at';
 
       // Update state if changed
-      if (newPage !== page.value || newPageSize !== pageSize.value || newOrdering !== ordering.value) {
+      if (
+        newPage !== page.value ||
+        newPageSize !== pageSize.value ||
+        newOrdering !== ordering.value
+      ) {
         page.value = newPage;
         pageSize.value = newPageSize;
         ordering.value = newOrdering;

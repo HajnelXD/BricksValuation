@@ -8,7 +8,6 @@ docker compose up -d
 # Wait for services to be healthy/ready (give them time to start)
 echo "Waiting for services to be ready..."
 sleep 15
-ś
 # Clear database before tests
 echo "Clearing database before E2E tests..."
 docker compose exec -T backend python manage.py flush --no-input || true

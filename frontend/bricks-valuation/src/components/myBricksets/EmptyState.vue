@@ -31,8 +31,8 @@ function handleAddBrickset() {
 
     <!-- Action Button -->
     <button
-      @click="handleAddBrickset"
       class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+      @click="handleAddBrickset"
     >
       {{ $t('myBrickSets.empty.action') }}
     </button>

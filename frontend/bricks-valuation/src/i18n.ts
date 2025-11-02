@@ -271,7 +271,8 @@ const messages = {
       },
       editable: {
         tooltipEditable: 'Kliknij aby edytować zestaw',
-        tooltipNotEditable: 'Nie można edytować zestawu, ponieważ posiada wyceny innych użytkowników lub polubienia',
+        tooltipNotEditable:
+          'Nie można edytować zestawu, ponieważ posiada wyceny innych użytkowników lub polubienia',
       },
       empty: {
         title: 'Nie masz jeszcze żadnych zestawów',

@@ -4,6 +4,7 @@ from __future__ import annotations
 from dataclasses import asdict
 
 from rest_framework import status
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -16,6 +17,8 @@ from account.services import RegistrationService
 class RegisterUserView(APIView):
     """Handle user registration via POST /api/v1/auth/register."""
 
+    authentication_classes = []
+    permission_classes = [AllowAny]
     service_class = RegistrationService
 
     def post(self, request: Request) -> Response:
