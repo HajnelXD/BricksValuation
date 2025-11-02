@@ -40,14 +40,14 @@ function handleKeydown(event: KeyboardEvent) {
           ? $t('myBrickSets.editable.tooltipEditable')
           : $t('myBrickSets.editable.tooltipNotEditable')
       "
-      @click.stop="handleClick"
-      @keydown="handleKeydown"
       :class="[
         'p-2 rounded-lg transition-colors',
         editable
           ? 'text-blue-400 hover:bg-blue-900/30 cursor-pointer'
           : 'text-gray-500 cursor-not-allowed opacity-50',
       ]"
+      @click.stop="handleClick"
+      @keydown="handleKeydown"
     >
       <span class="text-lg">✏️</span>
     </button>

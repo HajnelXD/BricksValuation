@@ -144,7 +144,7 @@ describe('Authentication Flow', () => {
           const authCookie = Array.isArray(cookies)
             ? cookies.find((cookie) => cookie.includes('jwt_token'))
             : cookies.includes('jwt_token');
-          expect(authCookie).to.exist;
+          expect(authCookie).to.not.equal(undefined);
         }
       });
     });
@@ -205,8 +205,8 @@ describe('Authentication Flow', () => {
         // Verify response status
         expect(response.status).to.eq(204);
 
-        // Verify no response body
-        expect(response.body).to.be.empty;
+        // Verify no response body (response.body is empty string for 204)
+        expect(response.body).to.have.length(0);
       });
     });
 

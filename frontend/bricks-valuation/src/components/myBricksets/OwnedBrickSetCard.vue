@@ -47,7 +47,10 @@ function handleEditClick() {
     <BrickSetBasicInfo :brickset="brickset" />
 
     <!-- Metrics -->
-    <BrickSetMetrics :valuations-count="brickset.valuationsCount" :total-likes="brickset.totalLikes" />
+    <BrickSetMetrics
+      :valuations-count="brickset.valuationsCount"
+      :total-likes="brickset.totalLikes"
+    />
 
     <!-- Footer with Edit Button -->
     <div class="flex items-center justify-end">

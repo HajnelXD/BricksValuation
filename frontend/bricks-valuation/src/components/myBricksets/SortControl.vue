@@ -12,7 +12,7 @@ interface Props {
   options: SortOption[];
 }
 
-const props = defineProps<Props>();
+defineProps<Props>();
 
 const emit = defineEmits<{
   'update:modelValue': [value: SortOrderingValue];
@@ -32,8 +32,8 @@ function handleChange(event: Event) {
     <select
       id="sort-select"
       :value="modelValue"
-      @change="handleChange"
       class="px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      @change="handleChange"
     >
       <option v-for="option in options" :key="option.value" :value="option.value">
         {{ option.label }}

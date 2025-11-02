@@ -4,9 +4,5 @@ import './commands';
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
 
-// This will run before each test
-beforeEach(() => {
-  // Clear cookies and local storage before each test
-  cy.clearCookies();
-  cy.clearLocalStorage();
-});
+// Note: cy.session() handles cookie preservation automatically in Cypress 12+
+// We don't need to clear cookies before each test as cy.session() manages this

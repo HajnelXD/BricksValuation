@@ -83,9 +83,9 @@ function nextPage() {
   <div v-if="totalPages > 1" class="flex items-center justify-center gap-2 mt-6">
     <!-- Previous Button -->
     <button
-      @click="previousPage"
       :disabled="currentPage === 1"
       class="px-3 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      @click="previousPage"
     >
       {{ $t('common.previous') }}
     </button>
@@ -95,16 +95,16 @@ function nextPage() {
       <button
         v-for="page in pages"
         :key="page"
-        @click="page > 0 && goToPage(page)"
         :disabled="page === -1"
         :class="[
           'px-3 py-2 rounded-lg transition-colors',
           page === -1
             ? 'cursor-default text-gray-500'
             : page === currentPage
-            ? 'bg-blue-600 text-white'
-            : 'border border-gray-600 text-gray-300 hover:bg-gray-700',
+              ? 'bg-blue-600 text-white'
+              : 'border border-gray-600 text-gray-300 hover:bg-gray-700',
         ]"
+        @click="page > 0 && goToPage(page)"
       >
         {{ page === -1 ? '...' : page }}
       </button>
@@ -112,9 +112,9 @@ function nextPage() {
 
     <!-- Next Button -->
     <button
-      @click="nextPage"
       :disabled="currentPage === totalPages"
       class="px-3 py-2 rounded-lg border border-gray-600 text-gray-300 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+      @click="nextPage"
     >
       {{ $t('common.next') }}
     </button>
