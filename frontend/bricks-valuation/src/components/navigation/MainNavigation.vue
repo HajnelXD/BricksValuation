@@ -28,9 +28,23 @@ const navTiles = computed(() => [
     isAction: false,
   },
   {
+    name: 'my-bricksets' as const,
+    label: t('nav.mySets'),
+    icon: '🏠',
+    requiresAuth: true,
+    isAction: false,
+  },
+  {
     name: 'brickset-create' as const,
     label: t('bricksets.create.addNew'),
     icon: '➕',
+    requiresAuth: true,
+    isAction: false,
+  },
+  {
+    name: 'my-valuations' as const,
+    label: t('nav.myValuations'),
+    icon: '⭐',
     requiresAuth: true,
     isAction: false,
   },

@@ -44,6 +44,24 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../pages/bricksets/BrickSetEditView.vue'),
     meta: { requiresAuth: true },
   },
+  {
+    path: '/app/my/bricksets',
+    name: 'my-bricksets',
+    component: () => import('../pages/bricksets/MyBrickSetsView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/app/my/bricksets/:id/edit',
+    name: 'my-brickset-edit',
+    component: () => import('../pages/bricksets/BrickSetEditView.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/my-valuations',
+    name: 'my-valuations',
+    component: () => import('../pages/valuations/MyValuationsView.vue'),
+    meta: { requiresAuth: true },
+  },
 ];
 
 export const router = createRouter({

@@ -9,10 +9,37 @@ describe('LikeButton Component', () => {
         likesCount: 10,
         disabled: false,
         loading: false,
+        isLiked: false,
       },
     });
 
     expect(wrapper.text()).toContain('10');
+  });
+
+  it('displays filled heart emoji when isLiked is true', () => {
+    const wrapper = mount(LikeButton, {
+      props: {
+        likesCount: 5,
+        disabled: false,
+        loading: false,
+        isLiked: true,
+      },
+    });
+
+    expect(wrapper.text()).toContain('❤️');
+  });
+
+  it('displays outline heart emoji when isLiked is false', () => {
+    const wrapper = mount(LikeButton, {
+      props: {
+        likesCount: 5,
+        disabled: false,
+        loading: false,
+        isLiked: false,
+      },
+    });
+
+    expect(wrapper.text()).toContain('🤍');
   });
 
   it('emits like event when clicked and not disabled', async () => {
@@ -21,6 +48,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: false,
         loading: false,
+        isLiked: false,
       },
     });
 
@@ -36,6 +64,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: true,
         loading: false,
+        isLiked: false,
       },
     });
 
@@ -50,6 +79,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: false,
         loading: true,
+        isLiked: false,
       },
     });
 
@@ -64,6 +94,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: false,
         loading: true,
+        isLiked: false,
       },
     });
 
@@ -76,6 +107,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: true,
         loading: false,
+        isLiked: false,
       },
     });
 
@@ -84,17 +116,34 @@ describe('LikeButton Component', () => {
     expect(button.classes()).toContain('cursor-not-allowed');
   });
 
-  it('applies active styles when enabled', () => {
+  it('applies red styles when liked and enabled', () => {
     const wrapper = mount(LikeButton, {
       props: {
         likesCount: 5,
         disabled: false,
         loading: false,
+        isLiked: true,
       },
     });
 
     const button = wrapper.find('button');
-    expect(button.classes()).toContain('bg-blue-600');
+    expect(button.classes()).toContain('text-red-600');
+    expect(button.classes()).toContain('hover:bg-red-100');
+  });
+
+  it('applies gray styles when not liked and enabled', () => {
+    const wrapper = mount(LikeButton, {
+      props: {
+        likesCount: 5,
+        disabled: false,
+        loading: false,
+        isLiked: false,
+      },
+    });
+
+    const button = wrapper.find('button');
+    expect(button.classes()).toContain('bg-gray-200');
+    expect(button.classes()).toContain('text-gray-700');
   });
 
   it('has correct aria-busy attribute when loading', () => {
@@ -103,6 +152,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: false,
         loading: true,
+        isLiked: false,
       },
     });
 
@@ -116,6 +166,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: true,
         loading: false,
+        isLiked: false,
       },
     });
 
@@ -129,6 +180,7 @@ describe('LikeButton Component', () => {
         likesCount: 5,
         disabled: false,
         loading: true,
+        isLiked: false,
       },
     });
 
@@ -142,6 +194,7 @@ describe('LikeButton Component', () => {
         likesCount: 0,
         disabled: false,
         loading: false,
+        isLiked: false,
       },
     });
 

@@ -1,13 +1,27 @@
 <script setup lang="ts">
 /**
  * LikeButton Component
- * Przycisk lajku z licznikiem, disabled jeśli użytkownik jest autorem lub już polajkował
+ * Przycisk lajku z licznikiem i dynamiczną ikoną serca
+ *
+ * Features:
+ * - Filled heart when already liked, outline when not
+ * - Disabled state for author or when not authenticated
+ * - Loading spinner during API request
+ * - Responsive styling with dark mode support
+ * - Accessibility features (aria-label, aria-busy)
+ *
+ * Props:
+ * - likesCount: Current number of likes
+ * - disabled: Whether button should be disabled
+ * - loading: Whether API request is in progress
+ * - isLiked: Whether current user has liked (optional, defaults to false)
  */
 
 defineProps<{
   likesCount: number;
   disabled: boolean;
   loading: boolean;
+  isLiked?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -24,15 +38,23 @@ function handleClick() {
     type="button"
     :disabled="disabled || loading"
     :class="[
-      'flex items-center gap-2 px-4 py-2 rounded-lg font-semibold transition-all duration-200',
-      'focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-blue-500',
+      'flex items-center gap-2 px-3 py-2 rounded-lg font-semibold transition-all duration-200',
+      'focus:outline-none focus:ring-2 focus:ring-offset-0 focus:ring-red-500',
       disabled
-        ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
-        : 'bg-blue-600 hover:bg-blue-700 text-white',
-      loading ? 'opacity-60' : '',
+        ? 'bg-gray-700 text-gray-400 cursor-not-allowed dark:bg-gray-800 dark:text-gray-500'
+        : isLiked
+          ? 'bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50'
+          : 'bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-300 dark:hover:bg-gray-600',
+      loading ? 'opacity-70' : '',
     ]"
     :aria-busy="loading"
-    :aria-label="disabled ? $t('bricksets.detail.liked') : $t('bricksets.detail.likeButton')"
+    :aria-label="
+      disabled
+        ? $t('likes.button.loginToLike')
+        : isLiked
+          ? $t('likes.button.liked')
+          : $t('likes.button.like')
+    "
     @click="handleClick"
   >
     <!-- Spinner when loading -->
@@ -51,15 +73,13 @@ function handleClick() {
       />
     </svg>
 
-    <!-- Heart Icon -->
-    <span class="text-lg" aria-hidden="true">❤️</span>
+    <!-- Heart Icon: Filled when liked, outline when not -->
+    <span class="text-lg flex-shrink-0" aria-hidden="true">
+      {{ isLiked ? '❤️' : '🤍' }}
+    </span>
 
     <!-- Count -->
-    <span>{{ likesCount }}</span>
-
-    <!-- Text -->
-    <span v-if="disabled && !loading" class="text-sm">{{ $t('bricksets.detail.liked') }}</span>
-    <span v-else-if="!loading" class="text-sm">{{ $t('bricksets.detail.likeButton') }}</span>
+    <span class="min-w-[1.5rem] text-center">{{ likesCount }}</span>
   </button>
 </template>
 

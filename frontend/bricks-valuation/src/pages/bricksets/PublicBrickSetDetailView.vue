@@ -30,7 +30,7 @@ const router = useRouter();
 const authStore = useAuthStore();
 const notificationStore = useNotificationStore();
 
-const { brickSet, loading, error, fetchBrickSet, likeValuation } = useBrickSetDetail();
+const { brickSet, loading, error, fetchBrickSet } = useBrickSetDetail();
 
 // Computed properties
 const brickSetId = computed(() => {
@@ -110,30 +110,15 @@ function handleValuationCreated(): void {
 }
 
 /**
- * Handle like valuation action
+ * Handle like valuation action from ValuationCard
+ * NOTE: ValuationCard now handles all like logic via useLikeValuation composable
+ * including optimistic updates, error handling, and notifications
+ * This handler is kept for backwards compatibility and potential analytics
  */
-async function handleLikeValuation(valuationId: number) {
-  if (!authStore.isAuthenticated) {
-    notificationStore.addNotification({
-      type: 'error',
-      message: 'Musisz być zalogowany, aby polajkować wycenę',
-    });
-    return;
-  }
-
-  try {
-    await likeValuation(valuationId);
-    notificationStore.addNotification({
-      type: 'success',
-      message: 'Wycena została polajkowana!',
-    });
-  } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : 'Błąd podczas polajkowania wyceny';
-    notificationStore.addNotification({
-      type: 'error',
-      message: errorMessage,
-    });
-  }
+function handleLikeValuation(): void {
+  // Like action is fully handled by ValuationCard
+  // Optimistic updates are applied immediately
+  // No additional action needed here
 }
 
 /**
